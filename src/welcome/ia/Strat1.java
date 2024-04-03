@@ -4,7 +4,6 @@ import welcome.Jeu;
 import welcome.Joueur;
 import welcome.Rue;
 import welcome.Travaux;
-import welcome.utils.Couleur;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,8 +19,6 @@ public class Strat1 extends Strat{
     public final int[][] rue0Base = { {-1}, {-1}, {-1}, {-1}, {10, 9}, {11, 10}, {12, 11}, {13, 12}, {14, 13}, {15, 14} };
     public final int[][] rue1Base = { {1, 2}, {2, 3}, {3, 4}, {4, 5}, {6, 7}, {-1}, {-1}, {-1}, {-1}, {-1}, {-1} };
     public final int[][] rue2Base = { {1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}, {7, 8, 9, 10}, {11, 10}, {12, 11}, {13, 12}, {14, 13}, {15, 14} };
-
-    public ArrayList<ArrayList<ArrayList<Integer>>> matricePositions = new ArrayList<>();
 
     public Strat1(){
     }
