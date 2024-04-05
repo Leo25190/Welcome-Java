@@ -2,12 +2,12 @@ package welcome;
 
 public class Maison implements Cloneable{
 
-    int rue; // la rue 1, 2  ou 3
-    int position; //position dans la rue de 0 à 9, 10 ou 11 en fonction de la rue
+    public int rue; // la rue 1, 2  ou 3
+    public int position; //position dans la rue de 0 à 9, 10 ou 11 en fonction de la rue
     public int numero; // le numéro affecté à la maison [0 - 17] ou -1 quand pas encore de numéro 
-    boolean emplacementPiscine; // Est-ce que la maison a un emplacement pour construire une piscine
-    boolean piscine; //Est-ce qu'une piscine est construite ou non
-    boolean bis; //Est-ce qu'il y une 2e maison avec le même numéro   
+    public boolean emplacementPiscine; // Est-ce que la maison a un emplacement pour construire une piscine
+    public boolean piscine; //Est-ce qu'une piscine est construite ou non
+    public boolean bis; //Est-ce qu'il y une 2e maison avec le même numéro   
 
     //Constructeur
     public Maison(int _rue, int _position){

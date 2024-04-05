@@ -6,15 +6,8 @@ public class Main {
 
     public static void main(String[] args) {
         System.setProperty("file.encoding", "UTF-8");
-        test();
-        //exempleLanceIA();
+        exempleLanceIA();
         //exempleLanceJeuHumain();
-    }
-
-    public static void test(){
-        Joueur leo = new Bot(new Strat1(), "Léo", "Ville de fou malade pupuce");
-        Jeu jeu = new Jeu(new Joueur[]{leo});
-        jeu.jouer();
     }
     
     public static void exempleLanceIA() {
@@ -22,7 +15,7 @@ public class Main {
         try{
             // recoit un tableau des numéros de strat (strat0 etc.).
             // tous ensemble, n parties avec TOUT LE MONDE
-            TousEnsemble t = new TousEnsemble(new int[]{0,0,0,0,1}, 100);
+            TousEnsemble t = new TousEnsemble(new int[]{0,88, 241}, 1000);
             
             // championnat1v1 : les joueurs s'affrontent en duel sur n parties pour chaque duel
             //Championnat1v1 t = new Championnat1v1(new int[]{0,0,0,0,0}, 10);

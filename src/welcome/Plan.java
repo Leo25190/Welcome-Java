@@ -1,11 +1,11 @@
 package welcome;
 
 public class Plan extends Carte implements Cloneable{
-    int pointsPremier; // Points pour le ou les joueurs ayant validé en 1er ce plan (plusieurs joueurs peuvent y arriver pendant le mm tour de jeu)
-    int pointsSuivants; // Points pour les suivants
-    int[] tailleLotissements; // Contient la taile des lotissements nécessaires à la validation de ce plan
-    int nbLotissement; // Nombre de lotissements nécessaires à la validation de ce plan
-    int dejaAtteint; //0: pas encore atteint, 1: atteint à ce tour, 2: atteint un tour précèdent
+    public int pointsPremier; // Points pour le ou les joueurs ayant validé en 1er ce plan (plusieurs joueurs peuvent y arriver pendant le mm tour de jeu)
+    public int pointsSuivants; // Points pour les suivants
+    public int[] tailleLotissements; // Contient la taile des lotissements nécessaires à la validation de ce plan
+    public int nbLotissement; // Nombre de lotissements nécessaires à la validation de ce plan
+    public int dejaAtteint; //0: pas encore atteint, 1: atteint à ce tour, 2: atteint un tour précèdent
 
     //Constructeur
     public Plan(int _pointsPremier, int _pointsSuivants, int[] _tailleLotissements, int _nbLotissement){

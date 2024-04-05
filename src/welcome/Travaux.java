@@ -13,8 +13,8 @@ public class Travaux extends Carte implements Cloneable{
     //Symboles associés aux travaux (peut être changé)
     public static String[] symboles = new String[]{"🏊", "🚧", "📮", "🌳", "💰", "💈"};
     //🏊
-    int numero; // Le numero de la carte travaux
-    int action; // L'action de la carte travaux
+    public int numero; // Le numero de la carte travaux
+    public int action; // L'action de la carte travaux
     
     //Constructeur
     public Travaux(int _numero, int _action){

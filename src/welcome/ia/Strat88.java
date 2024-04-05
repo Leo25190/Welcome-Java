@@ -8,7 +8,7 @@ import welcome.Travaux;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class Strat1 extends Strat{
+public class Strat88 extends Strat{
     public final int[][] basePositions = {  {-1, -1, -1, -1, 10, 11, 12, 13, 14, 15},
                                             {1, 2, 3, 4, 5, 6, -1, -1, -1, -1, -1},
                                             {1, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 15}};
@@ -20,7 +20,7 @@ public class Strat1 extends Strat{
     public final int[][] rue1Base = { {1, 2}, {2, 3}, {3, 4}, {4, 5}, {6, 7}, {-1}, {-1}, {-1}, {-1}, {-1}, {-1} };
     public final int[][] rue2Base = { {1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}, {7, 8, 9, 10}, {11, 10}, {12, 11}, {13, 12}, {14, 13}, {15, 14} };
 
-    public Strat1(){
+    public Strat88(){
     }
 
     @Override

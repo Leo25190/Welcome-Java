@@ -6,17 +6,17 @@ import welcome.utils.Couleur;
 
 public class Ville implements Cloneable{
     
-    String nom; // le nom de la ville
+    public String nom; // le nom de la ville
     public Rue[] rues; // les rues de la ville
-    LinkedList<Lotissement> lotissements; // les lotissements de la ville
-    boolean[][] barrieres; // les barrières de la ville
-    int[] nbParcs; // le nombre de parcs dans chaque rue
-    int[] maxParcs; //  le maximum de parc de chaque rue
-    int[] avancementPrixLotissement; // l'avancement sur les prix en fonction des tailles de lotissements
-    int[] maxAvancement; // l'avancement max pour chaque taille de lotissement
-    int nbPiscine; // le nombre de piscine construite dans la ville
-    int nbInterimaire; // le nombre d'intérimaire embauché par la ville
-    int nbBis; // le nombre de numéro bis de la ville
+    public LinkedList<Lotissement> lotissements; // les lotissements de la ville
+    public boolean[][] barrieres; // les barrières de la ville
+    public int[] nbParcs; // le nombre de parcs dans chaque rue
+    public int[] maxParcs; //  le maximum de parc de chaque rue
+    public int[] avancementPrixLotissement; // l'avancement sur les prix en fonction des tailles de lotissements
+    public int[] maxAvancement; // l'avancement max pour chaque taille de lotissement
+    public int nbPiscine; // le nombre de piscine construite dans la ville
+    public int nbInterimaire; // le nombre d'intérimaire embauché par la ville
+    public int nbBis; // le nombre de numéro bis de la ville
     
     //Constructeur
     public Ville(String _nom){

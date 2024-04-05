@@ -101,13 +101,6 @@ public class Jeu implements Cloneable{
         for(int i=0; i<joueurs.length; i++) // Pour chaque joueur:
             score[i]=calculerScore(joueurs[i]); // on compte ses points (ne prends pas en compte les intérimaires)
         ajoutPointInterimaires(score); // On regarde les intérimaires de chacun pour savoir quels joueurs marquent les bonus.
-
-        if (verbose) {
-            System.out.println("Scores des joueurs");
-            for (int i = 0; i < score.length; i++) {
-                System.out.println("Score de " + joueurs[i].nom + " : " + score[i]);
-            }
-        }
         return score; //Retour du tableau contenant les scores des joueurs
     }
     
