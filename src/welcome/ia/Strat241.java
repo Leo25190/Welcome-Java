@@ -1,6 +1,7 @@
 package welcome.ia;
 
 import welcome.*;
+import welcome.utils.Couleur;
 import welcome.utils.RandomSingleton;
 import java.util.ArrayList;
 
@@ -42,7 +43,7 @@ public class Strat241 extends Strat{
             Travaux action = (Travaux)j.actions[pioche_idx].top();
             Travaux numero = (Travaux)j.numeros[pioche_idx].top();
 
-            if(action.getAction() == 0 && piscineAvailableAt(j, joueur, numero.getNumero())){ //piscine
+            if(action.getAction() == 0 && piscineAvailableFor(j, joueur, numero.getNumero())){ //piscine
                 pioche_choisie = pioche_idx;
                 construire_piscine = true;
             }
@@ -210,7 +211,7 @@ public class Strat241 extends Strat{
         return full;
     }*/
 
-    public static boolean piscineAvailableAt(Jeu j, int joueur, int numero){
+    public static boolean piscineAvailableFor(Jeu j, int joueur, int numero){ // TODO
         boolean out = false;
         for(int i = 0; i < 3; i++){
             if(numero <= 10 + i){
@@ -240,4 +241,23 @@ public class Strat241 extends Strat{
                 break;
         }
     }*/
+
+    private ArrayList<Integer> construirePossibilite(int numero, Joueur joueur){
+        int min; // Variable utiles
+        ArrayList<Integer> possibilite= new ArrayList(); //List des possibilités Ã  construire
+        for(int i=0; i<3; i++){//Pour chaque rue
+            min=joueur.ville.rues[i].taille-1; //on part de la fin
+            while(min>=0  && (joueur.ville.rues[i].maisons[min].numero==-1 || joueur.ville.rues[i].maisons[min].numero > numero))
+                min--; // on décrement le min tant qu'on a pas trouvé un numéro <=
+            if(min<0 || joueur.ville.rues[i].maisons[min].numero!=numero){
+
+                min++;// On part de la case suivante
+                while(min < joueur.ville.rues[i].taille && joueur.ville.rues[i].maisons[min].numero == -1){
+                    possibilite.add((Integer)(min+ 100*i)); // on construit les possibilités tant qu'on a des cases vides
+                    min++;
+                }
+            }
+        }
+        return possibilite;
+    }
 }
