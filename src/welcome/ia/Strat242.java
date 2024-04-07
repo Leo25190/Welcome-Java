@@ -1,10 +1,10 @@
 /*
 ########################################################
--------------------STRATEGIE 241------------------------
+-------------------STRATEGIE 242------------------------
 
 Cette stratégie se base sur un plateau ideal, et cherche à placer les numéros en respectant ce plan.
-Lotissements : 3x6 et 3x5
-Scoree moyen : 87.4
+Lotissements : 4x6 et 9x1
+Scoree moyen : 87.7
 ########################################################
  */
 package welcome.ia;
@@ -15,7 +15,7 @@ import welcome.utils.RandomSingleton;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class Strat241 extends Strat{
+public class Strat242 extends Strat{
     // bot de la mort qui tue
     int[] nombre_parcs; //Compte le nombre de parcs par ligne
     int nombre_agents;  //Compte le nombre d'agents immobilisers utilisés
@@ -40,11 +40,11 @@ public class Strat241 extends Strat{
             {5, 8, 12}
     };
     final static int[] nombre_parcs_max = new int[] {3, 4, 5};  //Le nombre max de parcs par rue
-    final static int[] valorisations_lotissement_optimales = new int[] {6, 6, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4, 3, 3, 3, 2, 2, 1, 0}; //L'ordre de valorisation des lotissements, ici d'abord les 6 puis les 5
-    final static int nombre_agents_necessaires = 8; //Le nombre d'agents immobiliers nécessaires pour mener à bien la stratégie
-    final static int[] choix_barriere_optimale = new int[] {25, 15, 5, 0}; //Les choix de placement de barrières dans l'ordre, ici pour former des lotissements 3x6 et 3x5
+    final static int[] valorisations_lotissement_optimales = new int[] {6, 6, 6, 6, 1, 5, 5, 5, 5, 4, 4, 4, 4, 3, 3, 3, 2, 2, 0}; //L'ordre de valorisation des lotissements, ici d'abord les 6 puis les 5
+    final static int nombre_agents_necessaires = 5; //Le nombre d'agents immobiliers nécessaires pour mener à bien la stratégie
+    final static int[] choix_barriere_optimale = new int[] {25, 19, 18, 17, 16, 15, 9, 8, 7, 6, 0}; //Les choix de placement de barrières dans l'ordre, ici pour former des lotissements 3x6 et 3x5
 
-    public Strat241() {
+    public Strat242() {
         this.nombre_parcs = new int[3];
         this.nombre_agents = 0;
         this.nombre_barrieres = 0;
@@ -110,19 +110,6 @@ public class Strat241 extends Strat{
             }
         }
 
-        //AGENTS IMMOBILIERS
-        for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
-            if(action.get(pioche_idx) == 4 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0 && nombre_agents < nombre_agents_necessaires){
-                res = pioche_idx;
-                bestPiocheFound = true;
-
-                emplacement_choisi = meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
-
-                System.out.println("################################## AGENT " + emplacement_choisi);
-
-            }
-        }
-
         //BARRIERES
         for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
             if(action.get(pioche_idx) == 5 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0 && nombre_barrieres < choix_barriere_optimale.length-1){
@@ -132,6 +119,19 @@ public class Strat241 extends Strat{
                 emplacement_choisi = meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
 
                 System.out.println("################################## BARRIERE " + emplacement_choisi);
+
+            }
+        }
+
+        //AGENTS IMMOBILIERS
+        for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
+            if(action.get(pioche_idx) == 4 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0 && nombre_agents < nombre_agents_necessaires){
+                res = pioche_idx;
+                bestPiocheFound = true;
+
+                emplacement_choisi = meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
+
+                System.out.println("################################## AGENT " + emplacement_choisi);
 
             }
         }
