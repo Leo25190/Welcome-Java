@@ -92,6 +92,7 @@ public class Strat241 extends Strat{
                 bestPiocheFound = true;
 
                 emplacement_choisi = meilleurEmplacementPiscine(numero.get(pioche_idx), plateau_ideal, possibilites_par_pioche.get(pioche_idx), j, joueur);
+
                 System.out.println("################################## PISCINE " + emplacement_choisi);
             }
         }
@@ -104,6 +105,7 @@ public class Strat241 extends Strat{
 
                 emplacement_choisi = meilleurEmplacementParc(nombre_parcs, possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
                 nombre_parcs[emplacement_choisi/100]++; //On ajoute le parc au compte sur la bonne ligne
+
                 System.out.println("################################## PARC " + emplacement_choisi);
 
             }
@@ -116,6 +118,7 @@ public class Strat241 extends Strat{
                 bestPiocheFound = true;
 
                 emplacement_choisi = meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
+
                 System.out.println("################################## BARRIERE " + emplacement_choisi);
 
             }
@@ -128,6 +131,7 @@ public class Strat241 extends Strat{
                 bestPiocheFound = true;
 
                 emplacement_choisi = meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
+
                 System.out.println("################################## AGENT " + emplacement_choisi);
 
             }
@@ -141,22 +145,13 @@ public class Strat241 extends Strat{
 
                 emplacement_choisi = meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
                 emplacement_gap = isGap(j, joueur);
+
                 System.out.println("################################## BIS " + emplacement_choisi + " // GAP " + emplacement_gap);
 
             }
         }
 
-        //INTERIMAIRES
-        for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){  //TODO remplacer par un for avec double condition
-            if(action.get(pioche_idx) == 1 && meilleurEmplacementInterimaire(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0){
-                res = pioche_idx;
-                bestPiocheFound = true;
 
-                emplacement_choisi = meilleurEmplacementInterimaire(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
-                System.out.println("################################## INTERIMAIRE " + emplacement_choisi + " // ECART : " + valeur_interimaire + " // NUMERO : " + numero.get(pioche_idx));
-
-            }
-        }
 
 
         //CAS PAR DEFAUT
@@ -166,9 +161,10 @@ public class Strat241 extends Strat{
             int max_emplacement = -1;
             int max_emplacement_idx = -1;
 
-            for(int i = 0; i < 3; i++){
+            for(int i = 0; i < 3; i++){     //Trouve le meilleur emplacement pour chaque pioche
                 meilleurs_emplacements_trouves[i] = meilleurEmplacementDefault(possibilites_par_pioche.get(i), numero.get(i), j, joueur);
             }
+
             for(int i = 0; i < meilleurs_emplacements_trouves.length; i++){
                 if(max_emplacement < meilleurs_emplacements_trouves[i]){
                     max_emplacement = meilleurs_emplacements_trouves[i];
@@ -177,8 +173,23 @@ public class Strat241 extends Strat{
             }
             res = max_emplacement_idx;
             emplacement_choisi = max_emplacement;
+            bestPiocheFound = true;
 
             System.out.println("################################## DEFAULT " + emplacement_choisi);
+        }
+
+        //INTERIMAIRES
+        //TODO pourquoi on perd 3 points avec ce bout de code bordel de merde + réécrire proprement au dessus
+        for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
+            if(action.get(pioche_idx) == 1 && meilleurEmplacementInterimaire(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0){
+                res = pioche_idx;
+                bestPiocheFound = true;
+
+                emplacement_choisi = meilleurEmplacementInterimaire(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
+
+                System.out.println("################################## INTERIMAIRE " + emplacement_choisi + " // ECART : " + valeur_interimaire + " // NUMERO : " + numero.get(pioche_idx));
+
+            }
         }
 
         if(res<0 || res>2)
@@ -196,7 +207,7 @@ public class Strat241 extends Strat{
         int res=0;
         
         if(emplacement_gap != -1) {
-            res = getIndexFromPlaceValide(placeValide, emplacement_gap);
+            res = placeValide.indexOf(emplacement_gap);
             emplacement_gap = -1;
         }
 
@@ -208,7 +219,7 @@ public class Strat241 extends Strat{
     public int choixEmplacement(Jeu j, int joueur, int numero, ArrayList<Integer> placeValide){
         int res = -1;
         if(emplacement_choisi != -1){
-            res = getIndexFromPlaceValide(placeValide, emplacement_choisi); //on récupère l'index de l'emplacement chosi dans placeValide
+            res = placeValide.indexOf(emplacement_choisi); //on récupère l'index de l'emplacement chosi dans placeValide
         }
         else{
             res = meilleurEmplacementDefault(placeValide, numero, j, joueur);
@@ -333,7 +344,7 @@ public class Strat241 extends Strat{
         return -1; //Aucun emplacement trouvé
     }
 
-    public static int meilleurEmplacementInterimaire(ArrayList<Integer> placeValide, int numero, Jeu j, int joueur){    //TODO Gestion d'erreurs -1
+    public static int meilleurEmplacementInterimaire(ArrayList<Integer> placeValide, int numero, Jeu j, int joueur){
         ArrayList<Integer> emplacements_trouves = new ArrayList<>();
         ArrayList<Integer> ecarts_necessaires = new ArrayList<>();
         int erreurs_trouvees = 0;
@@ -342,16 +353,23 @@ public class Strat241 extends Strat{
             emplacements_trouves.add(meilleurEmplacementDefault(placeValide, numero+i, j, joueur)); //Trouver le meilleur emplacelement
             ecarts_necessaires.add(i);
         }
-        for(int i = 0; i < emplacements_trouves.size(); i++){   //Supprime les -1 de la liste
-            if(emplacements_trouves.get(i - erreurs_trouvees) == -1) {
-                emplacements_trouves.remove(i - erreurs_trouvees);
-                ecarts_necessaires.remove(i - erreurs_trouvees);
-                erreurs_trouvees++;
+
+        for (int i = 0; i < emplacements_trouves.size(); i++) {     // Supprime les -1 de emplacements_trouves et les éléments correspondants de ecarts_necessaires
+            if (emplacements_trouves.get(i) == -1) {
+                emplacements_trouves.remove(i); // Supprimer le -1
+                ecarts_necessaires.remove(i); // Supprimer l'élément correspondant de ecarts_necessaires
+                i--; // Décrémenter i pour compenser la suppression et vérifier le nouvel élément à la même position
             }
         }
 
+
         if(!emplacements_trouves.isEmpty()){
+            for(int i = 0; i < emplacements_trouves.size(); i++){
+                System.out.println(emplacements_trouves.get(i));
+            }
+
             int meilleur_emplacement = Collections.max(emplacements_trouves);   //Récupère le max des emplacements trouvés afin de prioriser la rue du bas
+
             valeur_interimaire = ecarts_necessaires.get(emplacements_trouves.indexOf(meilleur_emplacement));    //Récupère l'écart avec le nombre originel de la carte nécessaire pour l'emplacement
             return meilleur_emplacement;
         }
@@ -411,17 +429,6 @@ public class Strat241 extends Strat{
         }
 
         return full;
-    }
-
-    public static int getIndexFromPlaceValide(ArrayList<Integer> placeValide, int numero){
-        int idx = -1;
-        if(numero >= 0){
-            for(int i = 0; i < placeValide.size(); i++){
-                if(placeValide.get(i) == numero)
-                    idx = i;
-            }
-        }
-        return idx;
     }
 
     public static boolean isInPlaceValide(ArrayList<Integer> placeValide, int emplacement){
