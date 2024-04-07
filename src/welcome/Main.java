@@ -6,55 +6,41 @@ public class Main {
 
     public static void main(String[] args) {
         System.setProperty("file.encoding", "UTF-8");
-        //exempleLanceIA();
-        exempleLanceJeuHumain();
+        //Mode 1 : plein de parties - Mode 2 : détail de la partie
+        lancerMode(1);
+    }
+
+    public static void lancerMode(int choix){
+        switch(choix){
+            case 1: exempleLanceIA(); break;
+            case 2: exempleLanceJeuHumain(); break;
+            default: System.out.println("Choix invalide");
+        }
     }
     
     public static void exempleLanceIA() {
-        //On crée le jeu
         try{
-            // recoit un tableau des numéros de strat (strat0 etc.).
-            // tous ensemble, n parties avec TOUT LE MONDE
-            TousEnsemble t = new TousEnsemble(new int[]{241}, 1000);
-            
-            // championnat1v1 : les joueurs s'affrontent en duel sur n parties pour chaque duel
-            //Championnat1v1 t = new Championnat1v1(new int[]{0,0,0,0,0}, 10);
-            
+            TousEnsemble t = new TousEnsemble(new int[]{88, 241}, 1000);
             t.run();
         }        
         catch(Exception e){
             e.printStackTrace();
-            //System.out.println(e);
         }
     }
     
     public static void exempleLanceJeuHumain() {
-        
-        //On déclare des joeurs
-        Joueur j1= new JoueurHumain("ShuterFly", "Poney Land");
-        Joueur j2= new Bot(new Strat0(), "IA", "RobotVille");
-        Joueur j3= new Bot(new Strat88(), "Leo", "Loos en gohelle");
-        Joueur j4= new Bot(new Strat241(), "Jules", "Los Angeles");
-        Joueur[] joueurs = new Joueur[1];
-        joueurs[0]=j4;
-        
-        //On crée le jeu
+        Joueur j0= new Bot(new Strat88(), "Leo", "Loos en gohelle");
+        Joueur j1= new Bot(new Strat241(), "Jules", "Los Angeles");
+        Joueur[] joueurs = {j0, j1};
+
         Jeu j= new Jeu(joueurs);
         try{
-            
-            int[] score = j.jouer(); //on lance la partie et on récupére les scores
-            //Qu'on affiche
+            int[] score = j.jouer();
             for(int i=0; i<score.length; i++)
-               System.out.println("Joueur " + i + " fini avec " + score[i] + " points.");
-            
-            //TousEnsemble t = new TousEnsemble(new int[]{1,2,1,2,1,2,1,2}, 100);
-            //Championnat1v1 t = new Championnat1v1(new int[]{1,2,1,2,1,2,1,2}, 10);
-            //t.run();
+               System.out.println("Joueur " + joueurs[i].nom + " fini avec " + score[i] + " points.");
         }        
         catch(Exception e){
             e.printStackTrace();
-            //System.out.println(e);
         }
     }
-    
 }

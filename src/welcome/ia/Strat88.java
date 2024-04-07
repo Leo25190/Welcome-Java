@@ -13,19 +13,12 @@ import java.util.Collections;
 public class Strat88 extends Strat{
     private double[][] basePositions;
     private int emplacementMaisonIndex;
-    private final double ecartParametre = 1.15;
-    public final int[][][] basePositions2 = {   { {-1}, {-1}, {-1}, {-1}, {10, 9}, {11, 10}, {12, 11}, {13, 12}, {14, 13}, {15, 14} },
-                                                { {1, 2}, {2, 3}, {3, 4}, {4, 5}, {6, 7}, {-1}, {-1}, {-1}, {-1}, {-1}, {-1} },
-                                                { {1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}, {7, 8, 9, 10}, {11, 10}, {12, 11}, {13, 12}, {14, 13}, {15, 14} }};
-
-    public final int[][] rue0Base = { {-1}, {-1}, {-1}, {-1}, {10, 9}, {11, 10}, {12, 11}, {13, 12}, {14, 13}, {15, 14} };
-    public final int[][] rue1Base = { {1, 2}, {2, 3}, {3, 4}, {4, 5}, {6, 7}, {-1}, {-1}, {-1}, {-1}, {-1}, {-1} };
-    public final int[][] rue2Base = { {1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}, {7, 8, 9, 10}, {11, 10}, {12, 11}, {13, 12}, {14, 13}, {15, 14} };
+    private final double ecartParametre = 0.99;
 
     public Strat88(){
-        basePositions = new double[][] {   {6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
-                                        {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
-                                        {1.67, 3.52, 4.78, 5.89, 6.85, 7.67, 8.33, 9.15, 10.11, 11.22, 12.48, 14.33}};
+        basePositions = new double[][] {    {6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
+                                            {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
+                                            {1.67, 3.52, 4.78, 5.89, 6.85, 7.67, 8.33, 9.15, 10.11, 11.22, 12.48, 14.33}};
         emplacementMaisonIndex = -1;
 
     }
@@ -48,26 +41,15 @@ public class Strat88 extends Strat{
 
         //Tests pour vérifier si la carte choisie est plaçable
         for (int i = 0 ; i < 3 ; i++) {
-            //TODO On cherche l'emplacement de la maison correspondant à nos critères. Si elle ne peut être placée, on met emplacementMaison à - 1
+            //On cherche l'emplacement de la maison correspondant à nos critères. Si elle ne peut être placée, on met emplacementMaison à - 1
             int numeroActuel = numeros[classementIndex[i]];
             ArrayList<Integer> placesValides = construirePossibilite(numeroActuel, j.joueurs[joueur]);
             emplacementMaisonIndex = getEmplacementMaison(numeroActuel, placesValides);
             if (emplacementMaisonIndex != -1) {
                 return classementIndex[i];
             }
-
-            //Parcourir chaque rue et voir si la carte choisie est plaçable dans les emplacements par défaut
-            /*for (int k = 2 ; k >= 0 ; k--){
-                int indexMaison = trouverIndexMaison(k, numeros[classementIndex[i]]);
-                //Trouver la carte où l'emplacement de maison par défaut est disponible
-                if (j.joueurs[joueur].ville.rues[k].maisons[indexMaison].estVide()) {
-                    return classementIndex[i];
-                }
-            }*/
         }
-        
 
-        //TODO faire d'autres choix dans le cas où les nombres ne respectent pas les cases par défaut
         return 0;
     }
 
@@ -78,26 +60,6 @@ public class Strat88 extends Strat{
 
     @Override
     public int choixEmplacement(Jeu j, int joueur, int numero, ArrayList<Integer> placeValide) {
-        //Parcourt des rues pour trouver la première place valide dans la plus grande rue possible
-        /*for (int i = 2 ; i >= 0 ; i--) {
-            //Recherche du placement idéal pour la rue :
-            int positionIdeale = -1;
-            for (int k = 0 ; k < basePositions[i].length ; k++) {
-                if (basePositions[i][k] == numero) {
-                    positionIdeale = 100 * i + k;
-                }
-            }
-
-            //Recherche de l'index de la position idéale
-            if (positionIdeale != -1) {
-                for (int k = 0 ; k < placeValide.size() ; k++) {
-                    if (positionIdeale == placeValide.get(k)) {
-                        return k;
-                    }
-                }
-            }
-        }
-        return 0;*/
         return emplacementMaisonIndex == -1 ? 0 : emplacementMaisonIndex;
     }
 
@@ -139,6 +101,8 @@ public class Strat88 extends Strat{
             int emplacement = placesValides.get(i) % 100;
             double ecart = Math.abs(basePositions[rue][emplacement] - numero);
             if (ecart <= ecartParametre) {
+                if (numero ==1){
+                    return i; }
                 return i;
             }
         }
@@ -184,7 +148,7 @@ public class Strat88 extends Strat{
 
     public ArrayList<Integer> construirePossibilite(int numero, Joueur joueur){
         int min; // Variable utiles
-        ArrayList<Integer> possibilite= new ArrayList<>(); //List des possibilités Ã  construire
+        ArrayList<Integer> possibilite= new ArrayList<>();
 
         for(int i=0; i<3; i++){//Pour chaque rue
             min=joueur.ville.rues[i].taille-1; //on part de la fin
