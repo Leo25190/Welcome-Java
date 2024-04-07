@@ -13,7 +13,7 @@ import java.util.Collections;
 public class Strat88 extends Strat{
     private double[][] basePositions;
     private int emplacementMaisonIndex;
-    private final double ecartParametre = 0.99;
+    private final double[] ecartParametre = {0, 0, 0.99};
 
     public Strat88(){
         basePositions = new double[][] {    {6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
@@ -100,9 +100,7 @@ public class Strat88 extends Strat{
             int rue = placesValides.get(i) / 100;
             int emplacement = placesValides.get(i) % 100;
             double ecart = Math.abs(basePositions[rue][emplacement] - numero);
-            if (ecart <= ecartParametre) {
-                if (numero ==1){
-                    return i; }
+            if (ecart <= ecartParametre[rue]) {
                 return i;
             }
         }
@@ -136,16 +134,6 @@ public class Strat88 extends Strat{
         return index;
     }
 
-    public int trouverIndexMaison(int numeroRue, int numeroMaison) {
-        //Parcourir la rue choisie et voir quel index de la rue correspond au numéro de maison à placer
-        for (int i = 0 ; i < 10 + numeroRue ; i++) {
-            if (basePositions[numeroRue][i] == numeroMaison) {
-                return i;
-            }
-        }
-        return 0;
-    }
-
     public ArrayList<Integer> construirePossibilite(int numero, Joueur joueur){
         int min; // Variable utiles
         ArrayList<Integer> possibilite= new ArrayList<>();
@@ -165,46 +153,5 @@ public class Strat88 extends Strat{
             }
         }
         return possibilite;
-    }
-
-    public static int[][] updateRueBase(Rue rue, int[][] rueBase) {
-        // Si un tel numéro est déjà placé dans la rue, mettre -2, à tous les autres endroits où ce numéro apparaît
-        // Si tel numéro, ne peut plus être plaçable à tel emplacement, mettre -2 également
-
-        // Création de la liste des numéros déjà posés
-        ArrayList<Integer> listeNum = new ArrayList<>();
-        for (int i = 0 ; i < rue.taille ; i++){
-            if(!rue.maisons[i].estVide()) {
-                listeNum.add(rue.maisons[i].numero);
-            }
-        }
-
-        // Mise à jour de la rue avec les numéros déjà posés
-        for (Integer num : listeNum) {
-            for (int j = 0; j < rueBase.length; j++) {
-                for (int k = 0; k < rueBase[j].length; k++) {
-                    if (rueBase[j][k] == num) {
-                        rueBase[j][k] = -2;
-                    }
-                }
-            }
-        }
-
-        // Mettre un -2 partout dans les endroits où il y à déjà un numéro
-        for (int i = 0; i < rue.taille; i++) {
-            if (!rue.maisons[i].estVide()) {
-                Arrays.fill(rueBase[i], -2);
-            }
-        }
-
-        return rueBase;
-    }
-
-    public boolean rueContientNumero(Rue rue, int numero){
-        for(int i=0; i<rue.taille; i++){
-            if(rue.maisons[i].numero == numero)
-                return true;
-        }
-        return false;
     }
 }
