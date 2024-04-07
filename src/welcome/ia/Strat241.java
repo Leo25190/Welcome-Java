@@ -5,7 +5,7 @@
 Cette stratégie se base sur un plateau ideal, et cherche à placer les numéros en respectant ce plan.
 On forme trois lotissements de 6 et trois lotissements de 5.
 On place en priorité les piscines uniquement si elles respectent exactement le pleateau ideal.
-Sinon dans l'odre de priorité on maxe les parcs, on place les trois barrières nécessaires, //TODO
+Sinon dans l'odre de priorité on maxe les parcs, on place les trois barrières nécessaires, //TODO explications
 ########################################################
  */
 package welcome.ia;
@@ -14,6 +14,7 @@ import welcome.*;
 import welcome.utils.RandomSingleton;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class Strat241 extends Strat{
     // bot de la mort qui tue
@@ -29,6 +30,7 @@ public class Strat241 extends Strat{
     int[] pioche_choisie; // [0] = action, [1] = numero
     int emplacement_choisi; //Emplacement préférable
     int emplacement_gap;    //Emplacement d'un trou entre deux nombres si on en trouve un
+    static int valeur_interimaire; //Valeur ajoutée au numéro dans le cas d'un intérimaire
 
     final static int[][] emplacement_piscine_optimale = new int[][] {   //Les emplacements ou on veut placer des piscines sur les deux premières rues
             {2, 6, 7},
@@ -40,6 +42,7 @@ public class Strat241 extends Strat{
     };
     final static int[] nombre_parcs_max = new int[] {3, 4, 5};  //Le nombre max de parcs par rue
     final static int[] valorisations_lotissement_optimales = new int[] {6, 6, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4, 3, 3, 3, 2, 2, 1, 0}; //L'ordre de valorisation des lotissements, ici d'abord les 6 puis les 5
+    final static int nombre_agents_necessaires = 8; //Le nombre d'agents immobiliers nécessaires pour mener à bien la stratégie
     final static int[] choix_barriere_optimale = new int[] {25, 15, 5, 0}; //Les choix de placement de barrières dans l'ordre, ici pour former des lotissements 3x6 et 3x5
 
     public Strat241() {
@@ -66,6 +69,7 @@ public class Strat241 extends Strat{
         int res = -1;
         emplacement_choisi = -1;
         emplacement_gap = -1;
+        valeur_interimaire = 0;
 
         ArrayList<ArrayList> possibilites_par_pioche = new ArrayList<>();
         ArrayList<Integer> action = new ArrayList<>();
@@ -112,7 +116,7 @@ public class Strat241 extends Strat{
 
         //BARRIERES
         while(pioche_idx < 3 && !bestPiocheFound){
-            if(action.get(pioche_idx) == 5 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0 && nombre_barrieres < 3){
+            if(action.get(pioche_idx) == 5 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0 && nombre_barrieres < choix_barriere_optimale.length-1){
                 res = pioche_idx;
                 bestPiocheFound = true;
 
@@ -126,7 +130,7 @@ public class Strat241 extends Strat{
 
         //AGENTS IMMOBILIERS
         while(pioche_idx < 3 && !bestPiocheFound){
-            if(action.get(pioche_idx) == 4 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0 && nombre_agents < 8){
+            if(action.get(pioche_idx) == 4 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0 && nombre_agents < nombre_agents_necessaires){
                 res = pioche_idx;
                 bestPiocheFound = true;
 
@@ -153,7 +157,23 @@ public class Strat241 extends Strat{
         }
         pioche_idx = 0;
 
-        // TODO intérimaires
+        //INTERIMAIRES
+        while(pioche_idx < 3 && !bestPiocheFound){
+            if(action.get(pioche_idx) == 1 && meilleurEmplacementInterimaire(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0){
+                res = pioche_idx;
+                bestPiocheFound = true;
+
+                emplacement_choisi = meilleurEmplacementInterimaire(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
+                System.out.println("################################## INTERIMAIRE " + emplacement_choisi);
+
+            }
+            pioche_idx++;
+        }
+        pioche_idx = 0;
+
+
+        //CAS PAR DEFAUT
+        //Si on ne trouve pas de carte action utilisable, on cherche le meilleur numero à placer
         if(!bestPiocheFound){
             int[] meilleurs_emplacements_trouves = new int[3];
             int max_emplacement = -1;
@@ -212,10 +232,10 @@ public class Strat241 extends Strat{
         return res;
     }
     
-    //Choisit le nombre originel pour les intérimaires
+    //Choisit le nombre pour les intérimaires
     @Override
     public int choixNumero(Jeu j, int joueur, int numero){
-        int res=numero;
+        int res= numero + valeur_interimaire;
         return res;
     }
     
@@ -252,7 +272,7 @@ public class Strat241 extends Strat{
     };
 
 
-    // --------- UTILITAIRES ----------
+    // --------- MES FONCTIONS ----------
 
     private ArrayList<Integer> construirePossibilite(int numero, Joueur joueur){
         int min; // Variable utiles
@@ -318,6 +338,33 @@ public class Strat241 extends Strat{
             }
         }
         return -1; //Aucun emplacement trouvé
+    }
+
+    public static int meilleurEmplacementInterimaire(ArrayList<Integer> placeValide, int numero, Jeu j, int joueur){
+        ArrayList<Integer> emplacements_trouves = new ArrayList<>();
+        ArrayList<Integer> ecarts_necessaires = new ArrayList<>();
+        int erreurs_trouvees = 0;
+
+        for(int i = -2; i <= 2; i++){   //Pour toutes les valeurs que peut prendre la carte intérimaire
+            emplacements_trouves.add(meilleurEmplacementDefault(placeValide, numero+i, j, joueur)); //Trouver le meilleur emplacelement
+            ecarts_necessaires.add(numero+i);
+        }
+        for(int i = 0; i < emplacements_trouves.size(); i++){   //Supprime les -1 de la liste
+            if(emplacements_trouves.get(i - erreurs_trouvees) == -1) {
+                emplacements_trouves.remove(i - erreurs_trouvees);
+                ecarts_necessaires.remove(i - erreurs_trouvees);
+                erreurs_trouvees++;
+            }
+        }
+
+        if(!emplacements_trouves.isEmpty()){
+            int meilleur_emplacement = Collections.max(emplacements_trouves);   //Récupère le max des emplacements trouvés afin de prioriser la rue du bas
+            valeur_interimaire = ecarts_necessaires.get(emplacements_trouves.indexOf(meilleur_emplacement));    //Récupère l'écart avec le nombre originel de la carte nécessaire pour l'emplacement
+            return meilleur_emplacement;
+        }
+        else{
+            return -1;
+        }
     }
 
     public static int meilleurEmplacementDefault(ArrayList<Integer> placeValide, int numero, Jeu j, int joueur){
