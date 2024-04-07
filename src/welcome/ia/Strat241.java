@@ -83,11 +83,10 @@ public class Strat241 extends Strat{
             numero.add(((Travaux)j.numeros[pioche_idx].top()).getNumero());
         }
 
-        int pioche_idx = 0;
         boolean bestPiocheFound = false;
 
         //PISCINES
-        while(pioche_idx < 3 && !bestPiocheFound){
+        for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
             if(action.get(pioche_idx) == 0 && meilleurEmplacementPiscine(numero.get(pioche_idx), plateau_ideal, possibilites_par_pioche.get(pioche_idx), j, joueur) >= 0){ //Si on trouve une piscine parfaitement placable, on la place.
                 res = pioche_idx;
                 bestPiocheFound = true;
@@ -95,12 +94,10 @@ public class Strat241 extends Strat{
                 emplacement_choisi = meilleurEmplacementPiscine(numero.get(pioche_idx), plateau_ideal, possibilites_par_pioche.get(pioche_idx), j, joueur);
                 System.out.println("################################## PISCINE " + emplacement_choisi);
             }
-            pioche_idx++;
         }
-        pioche_idx = 0;
 
         //PARCS
-        while(pioche_idx < 3 && !bestPiocheFound){
+        for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
             if(action.get(pioche_idx) == 3 && meilleurEmplacementParc(nombre_parcs, possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0){  //Si on trouve un parc parfaitement placable, on le place.
                 res = pioche_idx;
                 bestPiocheFound = true;
@@ -110,12 +107,10 @@ public class Strat241 extends Strat{
                 System.out.println("################################## PARC " + emplacement_choisi);
 
             }
-            pioche_idx++;
         }
-        pioche_idx = 0;
 
         //BARRIERES
-        while(pioche_idx < 3 && !bestPiocheFound){
+        for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
             if(action.get(pioche_idx) == 5 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0 && nombre_barrieres < choix_barriere_optimale.length-1){
                 res = pioche_idx;
                 bestPiocheFound = true;
@@ -124,12 +119,10 @@ public class Strat241 extends Strat{
                 System.out.println("################################## BARRIERE " + emplacement_choisi);
 
             }
-            pioche_idx++;
         }
-        pioche_idx = 0;
 
         //AGENTS IMMOBILIERS
-        while(pioche_idx < 3 && !bestPiocheFound){
+        for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
             if(action.get(pioche_idx) == 4 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0 && nombre_agents < nombre_agents_necessaires){
                 res = pioche_idx;
                 bestPiocheFound = true;
@@ -138,12 +131,10 @@ public class Strat241 extends Strat{
                 System.out.println("################################## AGENT " + emplacement_choisi);
 
             }
-            pioche_idx++;
         }
-        pioche_idx = 0;
 
         //BIS POUR COMBLER LES GAPS
-        while(pioche_idx < 3 && !bestPiocheFound){
+        for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
             if(action.get(pioche_idx) == 3 &&  isGap(j, joueur)>= 0 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur)>=0){
                 res = pioche_idx;
                 bestPiocheFound = true;
@@ -153,23 +144,19 @@ public class Strat241 extends Strat{
                 System.out.println("################################## BIS " + emplacement_choisi + " // GAP " + emplacement_gap);
 
             }
-            pioche_idx++;
         }
-        pioche_idx = 0;
 
         //INTERIMAIRES
-        while(pioche_idx < 3 && !bestPiocheFound){
+        for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){  //TODO remplacer par un for avec double condition
             if(action.get(pioche_idx) == 1 && meilleurEmplacementInterimaire(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0){
                 res = pioche_idx;
                 bestPiocheFound = true;
 
                 emplacement_choisi = meilleurEmplacementInterimaire(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
-                System.out.println("################################## INTERIMAIRE " + emplacement_choisi);
+                System.out.println("################################## INTERIMAIRE " + emplacement_choisi + " // ECART : " + valeur_interimaire + " // NUMERO : " + numero.get(pioche_idx));
 
             }
-            pioche_idx++;
         }
-        pioche_idx = 0;
 
 
         //CAS PAR DEFAUT
@@ -302,14 +289,17 @@ public class Strat241 extends Strat{
         }
 
         // Autres rues
+        boolean found = false;
         for (int i = 1; i >= 0; i--) { // Parcours les deux premières rues
             if(!isFull(j.joueurs[joueur].ville.rues[i])){   //Si la rue n'est pas pleine
                 for (int k = 0; k < emplacement_piscine_optimale[i].length; k++) { // Parcours les emplacements de piscine optimaux pour chaque rue
                     int emplacement = emplacement_piscine_optimale[i][k];
                     int numeroPiscine = numero_piscine_optimale[i][k];
                     if (numero == numeroPiscine && j.joueurs[joueur].ville.rues[i].maisons[emplacement].numero == -1) {
-                        if(isInPlaceValide(placeValide, 100 * i + emplacement))
+                        if(isInPlaceValide(placeValide, 100 * i + emplacement)) {
+                            found = true;
                             return 100 * i + emplacement; // Retourne l'emplacement optimal si la maison est disponible et le numéro correspond
+                        }
                     }
                 }
             }
@@ -326,13 +316,16 @@ public class Strat241 extends Strat{
         }
 
         //Autres rues
+        boolean found = false;
         for(int i = 1; i >= 0; i--){ //Parcours les deux rues
             if(!isFull(j.joueurs[joueur].ville.rues[i])){   //Si la rue n'est pas pleine
-                for(int k = 0; k < plateau_ideal[i].length; k++){
+                for(int k = 0; k < plateau_ideal[i].length && !found; k++){
                     int numeroParc = (int)plateau_ideal[i][k];
                     if(numeroParc == numero && j.joueurs[joueur].ville.rues[i].maisons[k].numero == -1 && nombre_parcs[i] < nombre_parcs_max[i]){ //Si le numero correspond au plateau ideal, que l'emplacement est dispo et qu'il manque encore un parc
-                        if(isInPlaceValide(placeValide, 100 * i + k))
+                        if(isInPlaceValide(placeValide, 100 * i + k)) {
+                            found = true;
                             return 100 * i + k;
+                        }
                     }
                 }
             }
@@ -340,14 +333,14 @@ public class Strat241 extends Strat{
         return -1; //Aucun emplacement trouvé
     }
 
-    public static int meilleurEmplacementInterimaire(ArrayList<Integer> placeValide, int numero, Jeu j, int joueur){
+    public static int meilleurEmplacementInterimaire(ArrayList<Integer> placeValide, int numero, Jeu j, int joueur){    //TODO Gestion d'erreurs -1
         ArrayList<Integer> emplacements_trouves = new ArrayList<>();
         ArrayList<Integer> ecarts_necessaires = new ArrayList<>();
         int erreurs_trouvees = 0;
 
         for(int i = -2; i <= 2; i++){   //Pour toutes les valeurs que peut prendre la carte intérimaire
             emplacements_trouves.add(meilleurEmplacementDefault(placeValide, numero+i, j, joueur)); //Trouver le meilleur emplacelement
-            ecarts_necessaires.add(numero+i);
+            ecarts_necessaires.add(i);
         }
         for(int i = 0; i < emplacements_trouves.size(); i++){   //Supprime les -1 de la liste
             if(emplacements_trouves.get(i - erreurs_trouvees) == -1) {
@@ -377,11 +370,13 @@ public class Strat241 extends Strat{
         }
 
         // Autres rues
+        boolean found = false;
         for(int i = 1; i >= 0; i--) {
-            for(int k = 0; k < plateau_ideal[i].length; k++) {
+            for(int k = 0; k < plateau_ideal[i].length && !found; k++) {
                 int numeroIdeal = (int)plateau_ideal[i][k];
                 if(numeroIdeal == numero && j.joueurs[joueur].ville.rues[i].maisons[k].numero == -1) {
                     if(isInPlaceValide(placeValide, 100 * i + k)) {
+                        found = true;
                         return 100 * i + k;
                     }
                 }
