@@ -3,7 +3,9 @@
 -------------------STRATEGIE 241------------------------
 
 Cette stratégie se base sur un plateau ideal, et cherche à placer les numéros en respectant ce plan.
-On forme trois lotissements de 6
+On forme trois lotissements de 6 et trois lotissements de 5.
+On place en priorité les piscines uniquement si elles respectent exactement le pleateau ideal.
+Sinon dans l'odre de priorité on maxe les parcs, on place les trois barrières nécessaires, //TODO
 ########################################################
  */
 package welcome.ia;
