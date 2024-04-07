@@ -1,0 +1,53 @@
+# Ignore les fichiers système et cachés
+.DS_Store
+Thumbs.db
+
+# Ignore les fichiers d'environnement
+.env
+.env.local
+.env.*.local
+
+# Ignore les dossiers de dépendances
+/node_modules
+/bower_components
+
+# Ignore les fichiers de build et de compilation
+/build
+/dist
+
+# Ignore les fichiers de logs et de sauvegarde
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+/logs
+*.backup
+*.swp
+
+# Ignore les fichiers de configuration spécifiques aux éditeurs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Ignore les fichiers de cache
+.cache/
+
+# Ignore les fichiers de sauvegarde Emacs
+*~
+
+# Ignore les fichiers de données
+*.sqlite
+
+# Ignore les fichiers de déploiement
+.deploy/
+
+# Ignore les fichiers d'histoires utilisateur
+*.histfile
+
+# Ignore les fichiers de build spécifiques à certains outils
+/maven-target/
+/gradle-build/
+
+# Ignore le dossier de sortie
+out/
