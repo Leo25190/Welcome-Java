@@ -42,7 +42,7 @@ public class Strat242 extends Strat{
     final static int[] nombre_parcs_max = new int[] {3, 4, 5};  //Le nombre max de parcs par rue
     final static int[] valorisations_lotissement_optimales = new int[] {6, 6, 6, 6, 1, 5, 5, 5, 5, 4, 4, 4, 4, 3, 3, 3, 2, 2, 0}; //L'ordre de valorisation des lotissements, ici d'abord les 6 puis les 5
     final static int nombre_agents_necessaires = 5; //Le nombre d'agents immobiliers nécessaires pour mener à bien la stratégie
-    final static int[] choix_barriere_optimale = new int[] {25, 15, 6, 17, 16, 15, 14, 7, 6, 5, 4, 0}; //Les choix de placement de barrières dans l'ordre, ici pour former des lotissements 3x6 et 3x5      TODO probleme barriere invalide deja arrivé
+    final static int[] choix_barriere_optimale = new int[] {25, 15, 6, 17, 16, 15, 14, 7, 6, 5, 4, 0}; //Les choix de placement de barrières dans l'ordre, ici pour former des lotissements 3x6 et 3x5     TODO probleme barriere invalide deja arrivé
     final static double max_ecart = 2;
 
     public Strat242() {
