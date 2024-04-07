@@ -59,7 +59,7 @@ public class Strat242 extends Strat{
     
     @Override
     public String nomJoueur(){
-        return "JulesLaBulle";
+        return "JulesLaBulle2";
     }
     
     //Choisir au hasard parmi les 3 numéros dispos

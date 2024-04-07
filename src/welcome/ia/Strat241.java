@@ -43,6 +43,7 @@ public class Strat241 extends Strat{
     final static int[] valorisations_lotissement_optimales = new int[] {6, 6, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4, 3, 3, 3, 2, 2, 1, 0}; //L'ordre de valorisation des lotissements, ici d'abord les 6 puis les 5
     final static int nombre_agents_necessaires = 8; //Le nombre d'agents immobiliers nécessaires pour mener à bien la stratégie
     final static int[] choix_barriere_optimale = new int[] {25, 15, 5, 0}; //Les choix de placement de barrières dans l'ordre, ici pour former des lotissements 3x6 et 3x5
+    final static double max_ecart = 1;  //Pour les fonctions de recherche de minimum pour la dernière rue
 
     public Strat241() {
         this.nombre_parcs = new int[3];
@@ -59,7 +60,7 @@ public class Strat241 extends Strat{
     
     @Override
     public String nomJoueur(){
-        return "JulesLaBulle";
+        return "JulesLaBulle1";
     }
     
     //Choisir au hasard parmi les 3 numéros dispos
@@ -297,8 +298,8 @@ public class Strat241 extends Strat{
     public static int meilleurEmplacementPiscine(int numero, double[][] plateau_ideal, ArrayList<Integer> placeValide, Jeu j, int joueur) {
         // Test rue 2
         int idx = findClosestIndexAvailable(numero, plateau_ideal[2], j, joueur);
-        if (idx != -1 && Math.abs(numero - plateau_ideal[2][idx]) <= 1 && j.joueurs[joueur].ville.rues[2].maisons[idx].emplacementPiscine) {    //Si on trouve un indice, que l'écart est inférieur à 1, et qu'il y a un emplacement piscine
-            if(isInPlaceValide(placeValide, idx + 200))
+        if (idx != -1 && Math.abs(numero - plateau_ideal[2][idx]) <= max_ecart && j.joueurs[joueur].ville.rues[2].maisons[idx].emplacementPiscine) {    //Si on trouve un indice, que l'écart est inférieur à 1, et qu'il y a un emplacement piscine
+            if(placeValide.contains(idx + 200))
                 return idx + 200;
         }
 
@@ -310,7 +311,7 @@ public class Strat241 extends Strat{
                     int emplacement = emplacement_piscine_optimale[i][k];
                     int numeroPiscine = numero_piscine_optimale[i][k];
                     if (numero == numeroPiscine && j.joueurs[joueur].ville.rues[i].maisons[emplacement].numero == -1) {
-                        if(isInPlaceValide(placeValide, 100 * i + emplacement)) {
+                        if(placeValide.contains(100 * i + emplacement)) {
                             found = true;
                             return 100 * i + emplacement; // Retourne l'emplacement optimal si la maison est disponible et le numéro correspond
                         }
@@ -324,8 +325,8 @@ public class Strat241 extends Strat{
     public static int meilleurEmplacementParc(int[] nombre_parcs, ArrayList<Integer> placeValide, int numero, Jeu j, int joueur){
         //Rue 2
         int idx = findClosestIndexAvailable(numero, plateau_ideal[2], j, joueur);
-        if(idx != -1 && Math.abs(numero - plateau_ideal[2][idx]) <= 1 && nombre_parcs[2] < nombre_parcs_max[2]){ //Si il n'y a pas encore 5 parcs et qu'on trouve un index
-            if(isInPlaceValide(placeValide, idx + 200))
+        if(idx != -1 && Math.abs(numero - plateau_ideal[2][idx]) <= max_ecart && nombre_parcs[2] < nombre_parcs_max[2]){ //Si il n'y a pas encore 5 parcs et qu'on trouve un index
+            if(placeValide.contains(idx + 200))
                 return idx + 200;
         }
 
@@ -336,7 +337,7 @@ public class Strat241 extends Strat{
                 for(int k = 0; k < plateau_ideal[i].length && !found; k++){
                     int numeroParc = (int)plateau_ideal[i][k];
                     if(numeroParc == numero && j.joueurs[joueur].ville.rues[i].maisons[k].numero == -1 && nombre_parcs[i] < nombre_parcs_max[i]){ //Si le numero correspond au plateau ideal, que l'emplacement est dispo et qu'il manque encore un parc
-                        if(isInPlaceValide(placeValide, 100 * i + k)) {
+                        if(placeValide.contains(100 * i + k)) {
                             found = true;
                             return 100 * i + k;
                         }
@@ -379,8 +380,8 @@ public class Strat241 extends Strat{
     public static int meilleurEmplacementDefault(ArrayList<Integer> placeValide, int numero, Jeu j, int joueur){
         // Rue 2
         int idxRue2 = findClosestIndexAvailable(numero, plateau_ideal[2], j, joueur);
-        if(idxRue2 != -1 && Math.abs(numero - plateau_ideal[2][idxRue2]) <= 1) {
-            if(isInPlaceValide(placeValide, idxRue2 + 200)) {
+        if(idxRue2 != -1 && Math.abs(numero - plateau_ideal[2][idxRue2]) <= max_ecart) {
+            if(placeValide.contains(idxRue2 + 200)) {
                 return idxRue2 + 200;
             }
         }
@@ -391,7 +392,7 @@ public class Strat241 extends Strat{
             for(int k = 0; k < plateau_ideal[i].length && !found; k++) {
                 int numeroIdeal = (int)plateau_ideal[i][k];
                 if(numeroIdeal == numero && j.joueurs[joueur].ville.rues[i].maisons[k].numero == -1) {
-                    if(isInPlaceValide(placeValide, 100 * i + k)) {
+                    if(placeValide.contains(100 * i + k)) {
                         found = true;
                         return 100 * i + k;
                     }
@@ -427,16 +428,6 @@ public class Strat241 extends Strat{
         }
 
         return full;
-    }
-
-    public static boolean isInPlaceValide(ArrayList<Integer> placeValide, int emplacement){
-        boolean isIn = false;
-        for(int i = 0; i < placeValide.size(); i++){
-            if(placeValide.get(i) == emplacement){
-                isIn = true;
-            }
-        }
-        return isIn;
     }
 
     public static int isGap(Jeu j, int joueur){
