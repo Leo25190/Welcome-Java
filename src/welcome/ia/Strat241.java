@@ -436,7 +436,7 @@ public class Strat241 extends Strat{
                 int num_pre = j.joueurs[joueur].ville.rues[rue_idx].maisons[i-1].numero; //numéro maison précédente
                 int num_post = j.joueurs[joueur].ville.rues[rue_idx].maisons[i+1].numero; //numéro maison suivante
                 int num_act = j.joueurs[joueur].ville.rues[rue_idx].maisons[i].numero; //numéro maison actuelle
-                if(num_post - num_pre == 1 && num_pre != -1 && num_post != -1){ //Si les deux maisons adjacentes sont occupées, que la maison est dispo et que l'écart entre les deux vaut 1
+                if(num_post - num_pre == 1 && num_pre != -1 && num_post != -1 && num_act == -1){ //Si les deux maisons adjacentes sont occupées, que la maison est dispo et que l'écart entre les deux vaut 1
                     return 100*rue_idx + i;
                 }
             }
