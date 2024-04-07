@@ -15,7 +15,7 @@ public class Main {
         try{
             // recoit un tableau des numéros de strat (strat0 etc.).
             // tous ensemble, n parties avec TOUT LE MONDE
-            TousEnsemble t = new TousEnsemble(new int[]{0,88, 241}, 1000);
+            TousEnsemble t = new TousEnsemble(new int[]{88, 241}, 1000);
             
             // championnat1v1 : les joueurs s'affrontent en duel sur n parties pour chaque duel
             //Championnat1v1 t = new Championnat1v1(new int[]{0,0,0,0,0}, 10);
