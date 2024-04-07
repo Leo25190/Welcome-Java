@@ -1,26 +1,49 @@
+/*
+########################################################
+-------------------STRATEGIE 241------------------------
+########################################################
+
+ */
 package welcome.ia;
 
 import welcome.*;
-import welcome.utils.Couleur;
 import welcome.utils.RandomSingleton;
+
 import java.util.ArrayList;
 
 public class Strat241 extends Strat{
     // bot de la mort qui tue
+    int[] nombre_parcs; //Compte le nombre de parcs par ligne
+    int nombre_agents;  //Compte le nombre d'agents immobilisers utilisés
+    int nombre_barrieres;   //Compte le nombre de barrières placées
 
-    //Création d'un plateau idéal
-    double[][] plateau_ideal;
-    int pioche_choisie;
-    boolean construire_piscine;
+    final static double[][] plateau_ideal = new double[][] {   //Création d'un plateau idéal
+        {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+        {5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
+        {1, 2.3, 3.5, 4.8, 6.1, 7.4, 8.6, 9.9, 11.2, 12.6, 13.7, 15}
+    };
+    int[] pioche_choisie; // [0] = action, [1] = numero
+    int emplacement_choisi; //Emplacement préférable
+    int emplacement_gap;    //Emplacement d'un trou entre deux nombres si on en trouve un
 
+    final static int[][] emplacement_piscine_optimale = new int[][] {   //Les emplacements ou on veut placer des piscines sur les deux premières rues
+            {2, 6, 7},
+            {0, 3, 7}
+    };
+    final static int[][] numero_piscine_optimale = new int[][] {    //Les numéros qu'on veut pour les piscines sur les deux premières rues (correspondantes à l'emplacement optimal)
+            {3, 7, 8},
+            {5, 8, 12}
+    };
+    final static int[] nombre_parcs_max = new int[] {3, 4, 5};  //Le nombre max de parcs par rue
+    final static int[] valorisations_lotissement_optimales = new int[] {6, 6, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4, 3, 3, 3, 2, 2, 1, 0}; //L'ordre de valorisation des lotissements, ici d'abord les 6 puis les 5
+    final static int[] choix_barriere_optimale = new int[] {25, 15, 5, 0}; //Les choix de placement de barrières dans l'ordre, ici pour former des lotissements 3x6 et 3x5
 
     public Strat241() {
-        this.plateau_ideal = new double[][] {
-                {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
-                {5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
-                {1, 2.3, 3.5, 4.8, 6.1, 7.4, 8.6, 9.9, 11.2, 12.6, 13.7, 15}
-        };
+        this.nombre_parcs = new int[3];
+        this.nombre_agents = 0;
+        this.nombre_barrieres = 0;
 
+        pioche_choisie = new int[2];
     }
     
     @Override
@@ -30,217 +53,202 @@ public class Strat241 extends Strat{
     
     @Override
     public String nomJoueur(){
-        return "RAMAEN, Jules";
+        return "JulesLaBulle";
     }
     
     //Choisir au hasard parmi les 3 numéros dispos
     @Override
     public int choixCombinaison(Jeu j, int joueur){
-        pioche_choisie = -1;
+        int res = -1;
+        emplacement_choisi = -1;
+        emplacement_gap = -1;
 
-        for(int pioche_idx = 0; pioche_idx < 3; pioche_idx++){
+        ArrayList<ArrayList> possibilites_par_pioche = new ArrayList<>();
+        ArrayList<Integer> action = new ArrayList<>();
+        ArrayList<Integer> numero = new ArrayList<>();
 
-            Travaux action = (Travaux)j.actions[pioche_idx].top();
-            Travaux numero = (Travaux)j.numeros[pioche_idx].top();
+        for(int pioche_idx = 0; pioche_idx < 3; pioche_idx++){ //Construction des possibilités et des tableaux action et numero
 
-            if(action.getAction() == 0 && piscineAvailableFor(j, joueur, numero.getNumero())){ //piscine
-                pioche_choisie = pioche_idx;
-                construire_piscine = true;
-            }
-            else if(action.getAction() == 3){ //parc
-                pioche_choisie = pioche_idx;
-            }
+            possibilites_par_pioche.add(construirePossibilite(((Travaux)j.numeros[pioche_idx].top()).getNumero(), j.joueurs[joueur])); //On a toutes les possibilités pour chaque pioche
 
+            action.add(((Travaux)j.actions[pioche_idx].top()).getAction());
+            numero.add(((Travaux)j.numeros[pioche_idx].top()).getNumero());
         }
 
+        int pioche_idx = 0;
+        boolean bestPiocheFound = false;
 
-        /*
-        if(!is_full(j.joueurs[joueur].ville.rues[2])){ // si la rue 3 n'est pas vide, on la remplit
-            double[][] ecarts = new double[3][12];
+        //PISCINES
+        while(pioche_idx < 3 && !bestPiocheFound){
+            if(action.get(pioche_idx) == 0 && meilleurEmplacementPiscine(numero.get(pioche_idx), plateau_ideal, possibilites_par_pioche.get(pioche_idx), j, joueur) >= 0){ //Si on trouve une piscine parfaitement placable, on la place.
+                res = pioche_idx;
+                bestPiocheFound = true;
 
-            for(int pioche_idx = 0; pioche_idx < 3; pioche_idx++){          //parcours les trois pioches
-                for(int maison_idx = 0; maison_idx < 12; maison_idx++){     //parcours les maisons de la rue 3
+                emplacement_choisi = meilleurEmplacementPiscine(numero.get(pioche_idx), plateau_ideal, possibilites_par_pioche.get(pioche_idx), j, joueur);
+                System.out.println("################################## PISCINE " + emplacement_choisi);
+            }
+            pioche_idx++;
+        }
+        pioche_idx = 0;
 
-                    ecarts[pioche_idx][maison_idx] = Math.abs(plateau_ideal[2][maison_idx] - ((Travaux)j.numeros[0].top()).getNumero()); //calcule l'écart entre la carte de la pioche sélectionnée et le plateau ideal
+        //PARCS
+        while(pioche_idx < 3 && !bestPiocheFound){
+            if(action.get(pioche_idx) == 3 && meilleurEmplacementParc(nombre_parcs, possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0){  //Si on trouve un parc parfaitement placable, on le place.
+                res = pioche_idx;
+                bestPiocheFound = true;
 
+                emplacement_choisi = meilleurEmplacementParc(nombre_parcs, possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
+                nombre_parcs[emplacement_choisi/100]++; //On ajoute le parc au compte sur la bonne ligne
+                System.out.println("################################## PARC " + emplacement_choisi);
+
+            }
+            pioche_idx++;
+        }
+        pioche_idx = 0;
+
+        //BARRIERES
+        while(pioche_idx < 3 && !bestPiocheFound){
+            if(action.get(pioche_idx) == 5 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0 && nombre_barrieres < 3){
+                res = pioche_idx;
+                bestPiocheFound = true;
+
+                emplacement_choisi = meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
+                System.out.println("################################## BARRIERE " + emplacement_choisi);
+
+            }
+            pioche_idx++;
+        }
+        pioche_idx = 0;
+
+        //AGENTS IMMOBILIERS
+        while(pioche_idx < 3 && !bestPiocheFound){
+            if(action.get(pioche_idx) == 4 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0 && nombre_agents < 8){
+                res = pioche_idx;
+                bestPiocheFound = true;
+
+                emplacement_choisi = meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
+                System.out.println("################################## AGENT " + emplacement_choisi);
+
+            }
+            pioche_idx++;
+        }
+        pioche_idx = 0;
+
+        //BIS POUR COMBLER LES GAPS
+        while(pioche_idx < 3 && !bestPiocheFound){
+            if(action.get(pioche_idx) == 3 &&  isGap(j, joueur)>= 0 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur)>=0){
+                res = pioche_idx;
+                bestPiocheFound = true;
+
+                emplacement_choisi = meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
+                emplacement_gap = isGap(j, joueur);
+                System.out.println("################################## BIS " + emplacement_choisi + " // GAP " + emplacement_gap);
+
+            }
+            pioche_idx++;
+        }
+        pioche_idx = 0;
+
+        // TODO intérimaires
+        if(!bestPiocheFound){
+            int[] meilleurs_emplacements_trouves = new int[3];
+            int max_emplacement = -1;
+            int max_emplacement_idx = -1;
+
+            for(int i = 0; i < 3; i++){
+                meilleurs_emplacements_trouves[i] = meilleurEmplacementDefault(possibilites_par_pioche.get(i), numero.get(i), j, joueur);
+            }
+            for(int i = 0; i < meilleurs_emplacements_trouves.length; i++){
+                if(max_emplacement < meilleurs_emplacements_trouves[i]){
+                    max_emplacement = meilleurs_emplacements_trouves[i];
+                    max_emplacement_idx = i;
                 }
             }
+            res = max_emplacement_idx;
+            emplacement_choisi = max_emplacement;
 
-            int pioche_choisie = trouverIndiceLigneMin(ecarts);                       //la pioche dans laquelle se trouve le plus petit ecart
-            int maison_choisie = trouverIndiceColMinDansLigne(ecarts, pioche_choisie);  //la maison avec le nombre le plus proche
-
-
-        }
-        else{
-
+            System.out.println("################################## DEFAULT " + emplacement_choisi);
         }
 
-        */
+        if(res<0 || res>2)
+            res = RandomSingleton.getInstance().nextInt(3);
 
-        if(pioche_choisie<0 || pioche_choisie>2)
-            pioche_choisie = RandomSingleton.getInstance().nextInt(3);
-        return pioche_choisie;
+        pioche_choisie[0] = ((Travaux)j.numeros[res].top()).getNumero();
+        pioche_choisie[1] = ((Travaux)j.actions[res].top()).getAction();
+
+        return res;
     }
     
-    //Choisir de placer un numéro bis
+    //Place un numéro bis si il y a un trou
     @Override
     public int choixBis(Jeu j, int joueur, ArrayList<Integer> placeValide){
-        int res=-1;
+        int res=0;
         
-        //A COMPLETER
-        
-        if(res<0 || res>placeValide.size()-1)
-            res=RandomSingleton.getInstance().nextInt(placeValide.size());
+        if(emplacement_gap != -1) {
+            res = getIndexFromPlaceValide(placeValide, emplacement_gap);
+            emplacement_gap = -1;
+        }
+
         return res;
     }
     
-    //Choisir au hasard parmi les emplacements dispos
+    //Valide l'emplacement choisit dans choixCombinaison
     @Override
     public int choixEmplacement(Jeu j, int joueur, int numero, ArrayList<Integer> placeValide){
-        int res=-1;
-
-        if(construire_piscine){             //on place la piscine correctement, on sait déja que c'est possible grave a isPiscineAvailable
-            for(int i = 0; i < placeValide.size()-1; i++){
-                if(placeValide.get(i)/100 == 0 && (placeValide.get(i)%100 == 2 || placeValide.get(i)%100 == 6 || placeValide.get(i)%100 == 7)){
-                    res = i;
-                }
-                else if(placeValide.get(i)/100 == 1 && (placeValide.get(i)%100 == 0 || placeValide.get(i)%100 == 3 || placeValide.get(i)%100 == 7)){
-                    res = i;
-                }
-                else if(placeValide.get(i)/100 == 2 && (placeValide.get(i)%100 == 1 || placeValide.get(i)%100 == 6 || placeValide.get(i)%100 == 10)){
-                    res = i;
-                }
-            }
+        int res = -1;
+        if(emplacement_choisi != -1){
+            res = getIndexFromPlaceValide(placeValide, emplacement_choisi); //on récupère l'index de l'emplacement chosi dans placeValide
         }
-        
+        else{
+            res = meilleurEmplacementDefault(placeValide, numero, j, joueur);
+        }
+
         if(res<0 || res>placeValide.size()-1)
             res=RandomSingleton.getInstance().nextInt(placeValide.size());
         return res;
     }
     
-    //Choisir le même numéro que celui de la carte quand l'action est un intérimaire
+    //Choisit le nombre originel pour les intérimaires
     @Override
     public int choixNumero(Jeu j, int joueur, int numero){
-        int res=-1;
-        
-        //A COMPLETER
-        
-        if((res<(numero-2) || res>(numero+2)) || res<0)
-            res=Math.max(0, RandomSingleton.getInstance().nextInt(5) + numero - 2) ;
+        int res=numero;
         return res;
     }
     
-    //Valorise aléatoirement une taille de lotissements (proba plus forte si plus d'avancements possibles)
+    //Valorise en priorité les 6 puis les 5
     @Override
-    public int valoriseLotissement(Jeu j, int joueur){        
-        int res=-1;
-        
-        //A COMPLETER
-        
-        if(res<1 || res>6)
-            res=RandomSingleton.getInstance().nextInt(6)+1;
+    public int valoriseLotissement(Jeu j, int joueur){
+        int res = valorisations_lotissement_optimales[nombre_agents];
+        if(nombre_agents < valorisations_lotissement_optimales.length-1){
+            nombre_agents++;
+        }
         return res;
     }
     
-    //Met une barrière à une position aléatoire
+    //Forme des lotissements : 3x6 et 3x5
     @Override
     public int choixBarriere(Jeu j, int joueur,  ArrayList<Integer> placeValide){
-        int res=-1;
-        
-        //A COMPLETER
-        
-        if(res<0 || res>placeValide.size()-1)
-            res=RandomSingleton.getInstance().nextInt(placeValide.size());
+        int res = choix_barriere_optimale[nombre_barrieres];
+        if(nombre_barrieres < choix_barriere_optimale.length-1)
+            nombre_barrieres++;
         return res;
     }
     
     //Valide toujours un plan
     @Override
     public boolean validePlan(Jeu j, int joueur, int plan) {
-        boolean res = true;
-        
-        //A COMPLETER
-        
-        return res;
+        return true;
     }
     
     @Override
-    public void resetStrat(){};
+    public void resetStrat(){
+        nombre_agents = 0;
+        nombre_barrieres = 0;
+        for(int i = 0; i < nombre_parcs.length; i++){nombre_parcs[i] = 0;}
+    };
 
 
     // --------- UTILITAIRES ----------
-
-    //Pour trouver les indices du minimum des écarts par rapport au plateau ideal
-    /*
-    public static int trouverIndiceLigneMin(double[][] tableau) {
-        double min = tableau[0][0];
-        int indiceLigneMin = 0;
-        for (int i = 0; i < tableau.length; i++) {
-            for (int j = 0; j < tableau[i].length; j++) {
-                if (tableau[i][j] < min) {
-                    min = tableau[i][j];
-                    indiceLigneMin = i;
-                }
-            }
-        }
-        return indiceLigneMin;
-    }*/
-
-    /*
-    public static int trouverIndiceColMinDansLigne(double[][] tableau, int indiceLigne) {
-        double min = tableau[indiceLigne][0];
-        int indiceColMinDansLigne = 0;
-        for (int j = 0; j < tableau[indiceLigne].length; j++) {
-            if (tableau[indiceLigne][j] < min) {
-                min = tableau[indiceLigne][j];
-                indiceColMinDansLigne = j;
-            }
-        }
-        return indiceColMinDansLigne;
-    }*/
-
-    /*
-    public static boolean is_full(Rue rue){ //indique si une rue est pleine
-        boolean full = true;
-        for(int i = 0; i < rue.taille; i++){
-            if(rue.maisons[i].estVide()){
-                full = false;
-            }
-        }
-
-        return full;
-    }*/
-
-    public static boolean piscineAvailableFor(Jeu j, int joueur, int numero){ // TODO
-        boolean out = false;
-        for(int i = 0; i < 3; i++){
-            if(numero <= 10 + i){
-                if(j.joueurs[joueur].ville.rues[i].maisons[numero-1].emplacementPiscine && j.joueurs[joueur].ville.rues[i].maisons[numero-1].estVide()){    //si emplacement piscine et vide
-                    out = true;
-                }
-            }
-
-        }
-        return out;
-    }
-
-    /*
-    public static boolean isPiscine(int numero, int rue){
-        switch (rue){
-            case 1:
-                if(numero == 3 || numero == 7 || numero == 8){ return true;}
-                break;
-            case 2:
-                if(numero == 1 || numero == 4 || numero == 8){ return true;}
-                break;
-            case 3:
-                if(numero == 2 || numero == 7 || numero == 11){ return true;}
-                break;
-            default:
-                return false;
-                break;
-        }
-    }*/
 
     private ArrayList<Integer> construirePossibilite(int numero, Joueur joueur){
         int min; // Variable utiles
@@ -259,5 +267,138 @@ public class Strat241 extends Strat{
             }
         }
         return possibilite;
+    }
+
+    public static int meilleurEmplacementPiscine(int numero, double[][] plateau_ideal, ArrayList<Integer> placeValide, Jeu j, int joueur) {
+        // Test rue 2
+        int idx = findClosestIndexAvailable(numero, plateau_ideal[2], j, joueur);
+        if (idx != -1 && Math.abs(numero - plateau_ideal[2][idx]) <= 1 && j.joueurs[joueur].ville.rues[2].maisons[idx].emplacementPiscine) {    //Si on trouve un indice, que l'écart est inférieur à 1, et qu'il y a un emplacement piscine
+            if(isInPlaceValide(placeValide, idx + 200))
+                return idx + 200;
+        }
+
+        // Autres rues
+        for (int i = 1; i >= 0; i--) { // Parcours les deux premières rues
+            if(!isFull(j.joueurs[joueur].ville.rues[i])){   //Si la rue n'est pas pleine
+                for (int k = 0; k < emplacement_piscine_optimale[i].length; k++) { // Parcours les emplacements de piscine optimaux pour chaque rue
+                    int emplacement = emplacement_piscine_optimale[i][k];
+                    int numeroPiscine = numero_piscine_optimale[i][k];
+                    if (numero == numeroPiscine && j.joueurs[joueur].ville.rues[i].maisons[emplacement].numero == -1) {
+                        if(isInPlaceValide(placeValide, 100 * i + emplacement))
+                            return 100 * i + emplacement; // Retourne l'emplacement optimal si la maison est disponible et le numéro correspond
+                    }
+                }
+            }
+        }
+        return -1; // Aucun emplacement optimal trouvé
+    }
+
+    public static int meilleurEmplacementParc(int[] nombre_parcs, ArrayList<Integer> placeValide, int numero, Jeu j, int joueur){
+        //Rue 2
+        int idx = findClosestIndexAvailable(numero, plateau_ideal[2], j, joueur);
+        if(idx != -1 && Math.abs(numero - plateau_ideal[2][idx]) <= 1 && nombre_parcs[2] < nombre_parcs_max[2]){ //Si il n'y a pas encore 5 parcs et qu'on trouve un index
+            if(isInPlaceValide(placeValide, idx + 200))
+                return idx + 200;
+        }
+
+        //Autres rues
+        for(int i = 1; i >= 0; i--){ //Parcours les deux rues
+            if(!isFull(j.joueurs[joueur].ville.rues[i])){   //Si la rue n'est pas pleine
+                for(int k = 0; k < plateau_ideal[i].length; k++){
+                    int numeroParc = (int)plateau_ideal[i][k];
+                    if(numeroParc == numero && j.joueurs[joueur].ville.rues[i].maisons[k].numero == -1 && nombre_parcs[i] < nombre_parcs_max[i]){ //Si le numero correspond au plateau ideal, que l'emplacement est dispo et qu'il manque encore un parc
+                        if(isInPlaceValide(placeValide, 100 * i + k))
+                            return 100 * i + k;
+                    }
+                }
+            }
+        }
+        return -1; //Aucun emplacement trouvé
+    }
+
+    public static int meilleurEmplacementDefault(ArrayList<Integer> placeValide, int numero, Jeu j, int joueur){
+        // Rue 2
+        int idxRue2 = findClosestIndexAvailable(numero, plateau_ideal[2], j, joueur);
+        if(idxRue2 != -1 && Math.abs(numero - plateau_ideal[2][idxRue2]) <= 1) {
+            if(isInPlaceValide(placeValide, idxRue2 + 200)) {
+                return idxRue2 + 200;
+            }
+        }
+
+        // Autres rues
+        for(int i = 1; i >= 0; i--) {
+            for(int k = 0; k < plateau_ideal[i].length; k++) {
+                int numeroIdeal = (int)plateau_ideal[i][k];
+                if(numeroIdeal == numero && j.joueurs[joueur].ville.rues[i].maisons[k].numero == -1) {
+                    if(isInPlaceValide(placeValide, 100 * i + k)) {
+                        return 100 * i + k;
+                    }
+                }
+            }
+        }
+        return -1; // Aucun emplacement trouvé
+    }
+
+    public static int findClosestIndexAvailable(int numero, double[] rue, Jeu j, int joueur) { //Trouve ou placer le nombre pour minimiser l'écart avec le plateau ideal dans la rue 2, renvoie -1 si c'est impossible
+        int idx = -1;
+        if (!isFull(j.joueurs[joueur].ville.rues[2])) {
+            double min = Double.MAX_VALUE; // Initialiser min avec une valeur grande
+            for (int i = 0; i < rue.length; i++) {
+                if (j.joueurs[joueur].ville.rues[2].maisons[i].numero == -1) {
+                    double diff = Math.abs(numero - rue[i]);
+                    if (diff < min) {
+                        min = diff;
+                        idx = i;
+                    }
+                }
+            }
+        }
+        return idx;
+    }
+
+    public static boolean isFull(Rue rue){ //indique si une rue est pleine
+        boolean full = true;
+        for(int i = 0; i < rue.taille; i++){
+            if(rue.maisons[i].estVide()){
+                full = false;
+            }
+        }
+
+        return full;
+    }
+
+    public static int getIndexFromPlaceValide(ArrayList<Integer> placeValide, int numero){
+        int idx = -1;
+        if(numero >= 0){
+            for(int i = 0; i < placeValide.size(); i++){
+                if(placeValide.get(i) == numero)
+                    idx = i;
+            }
+        }
+        return idx;
+    }
+
+    public static boolean isInPlaceValide(ArrayList<Integer> placeValide, int emplacement){
+        boolean isIn = false;
+        for(int i = 0; i < placeValide.size(); i++){
+            if(placeValide.get(i) == emplacement){
+                isIn = true;
+            }
+        }
+        return isIn;
+    }
+
+    public static int isGap(Jeu j, int joueur){
+        for(int rue_idx = 2; rue_idx >= 0; rue_idx--){
+            for(int i = 1; i < j.joueurs[joueur].ville.rues[rue_idx].taille-1; i++){
+                int num_pre = j.joueurs[joueur].ville.rues[rue_idx].maisons[i-1].numero; //numéro maison précédente
+                int num_post = j.joueurs[joueur].ville.rues[rue_idx].maisons[i+1].numero; //numéro maison suivante
+                int num_act = j.joueurs[joueur].ville.rues[rue_idx].maisons[i].numero; //numéro maison actuelle
+                if(num_post - num_pre == 1 && num_pre != -1 && num_post != -1){ //Si les deux maisons adjacentes sont occupées, que la maison est dispo et que l'écart entre les deux vaut 1
+                    return 100*rue_idx + i;
+                }
+            }
+        }
+        return -1;
     }
 }
