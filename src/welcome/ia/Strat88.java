@@ -103,7 +103,7 @@ public class Strat88 extends Strat{
 
     @Override
     public boolean validePlan(Jeu j, int joueur, int plan) {
-        return false;
+        return true;
     }
 
     @Override

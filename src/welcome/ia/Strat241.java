@@ -1,8 +1,10 @@
 /*
 ########################################################
 -------------------STRATEGIE 241------------------------
-########################################################
 
+Cette stratégie se base sur un plateau ideal, et cherche à placer les numéros en respectant ce plan.
+On forme trois lotissements de 6
+########################################################
  */
 package welcome.ia;
 
