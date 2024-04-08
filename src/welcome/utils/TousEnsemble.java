@@ -15,6 +15,8 @@ public class TousEnsemble extends Tournoi{
     @Override
     public int[][] run() {
         int[][] score=new int[this.participants.length][2];
+        int[][] tousLesScores = new int[this.participants.length][nbPartie];
+
         int[] scorePartie;
         int place;
         int scoreTmp;
@@ -24,6 +26,12 @@ public class TousEnsemble extends Tournoi{
         j.verboseOnOff(false);
         for(int h=0; h<nbPartie; h++){           
             scorePartie=j.jouer();
+
+            for(int i = 0; i < this.participants.length; i++){
+                tousLesScores[i][h] = scorePartie[i];
+                System.out.println(tousLesScores[i][h]);
+            }
+
             classement= new Integer[this.participants.length];
             for(int i=0; i<classement.length; i++)
                 classement[i]=i;
@@ -56,9 +64,85 @@ public class TousEnsemble extends Tournoi{
                 participants[i].resetStrat();
             j.verboseOnOff(false);
         }
-        for(int i=0; i<score.length; i++)
-            System.out.println(this.participants[i].nom + " a fini en moyenne " + ((double)score[i][0])/nbPartie + " avec un score moyen de " + ((double)score[i][1])/nbPartie + " points");
+        for(int i=0; i<score.length; i++) {
+            System.out.println(this.participants[i].nom + " a fini en moyenne " + ((double) score[i][0]) / nbPartie + " avec un score moyen de " + ((double) score[i][1]) / nbPartie + " points");
+
+            System.out.println("SCORE MIN : " + minimum(tousLesScores[i]));
+            System.out.println("SCORE MAX : " + maximum(tousLesScores[i]));
+            System.out.println("MEDIANE : " + mediane(tousLesScores[i]));
+            System.out.println("PREMIER QUARTILE : " + premierQuartile(tousLesScores[i]));
+            System.out.println("TROISIEME QUARTILE : " + troisiemeQuartile(tousLesScores[i]));
+            System.out.println("ECART-TYPE : " + (int)Math.sqrt(variance(tousLesScores[i])));
+        }
         return score;
     }
-    
+
+    // Méthodes de calcul des statistiques
+
+    // Méthode pour calculer le minimum d'un tableau d'entiers
+    public static int minimum(int[] tableau) {
+        int min = tableau[0];
+        for (int i = 1; i < tableau.length; i++) {
+            if (tableau[i] < min) {
+                min = tableau[i];
+            }
+        }
+        return min;
+    }
+
+    // Méthode pour calculer le maximum d'un tableau d'entiers
+    public static int maximum(int[] tableau) {
+        int max = tableau[0];
+        for (int i = 1; i < tableau.length; i++) {
+            if (tableau[i] > max) {
+                max = tableau[i];
+            }
+        }
+        return max;
+    }
+
+    // Méthode pour calculer la médiane d'un tableau d'entiers
+    public static double mediane(int[] tableau) {
+        Arrays.sort(tableau);
+        int n = tableau.length;
+        if (n % 2 == 0) {
+            return (tableau[n / 2 - 1] + tableau[n / 2]) / 2.0;
+        } else {
+            return tableau[n / 2];
+        }
+    }
+
+    // Méthode pour calculer le premier quartile d'un tableau d'entiers
+    public static double premierQuartile(int[] tableau) {
+        Arrays.sort(tableau);
+        int n = tableau.length;
+        if (n % 4 == 0) {
+            return tableau[n / 4 - 1];
+        } else {
+            return tableau[n / 4];
+        }
+    }
+
+    // Méthode pour calculer le troisième quartile d'un tableau d'entiers
+    public static double troisiemeQuartile(int[] tableau) {
+        Arrays.sort(tableau);
+        int n = tableau.length;
+        if (n % 4 == 0) {
+            return tableau[3 * n / 4 - 1];
+        } else {
+            return tableau[3 * n / 4];
+        }
+    }
+
+    // Méthode pour calculer la variance d'un tableau d'entiers
+    public static double variance(int[] tableau) {
+        double moyenne = Arrays.stream(tableau).average().orElse(Double.NaN);
+        double sommeCarres = 0;
+        for (int valeur : tableau) {
+            sommeCarres += Math.pow(valeur - moyenne, 2);
+        }
+        return sommeCarres / tableau.length;
+    }
+
+
 }
