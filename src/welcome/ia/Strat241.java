@@ -42,7 +42,7 @@ public class Strat241 extends Strat{
             {5, 8, 12}
     };
     final static int[] nombre_parcs_max = new int[] {3, 4, 5};  //Le nombre max de parcs par rue
-    final static int[] valorisations_lotissement_optimales = new int[] {6, 6, 6, 6, 1, 5, 5, 5, 5, 4, 4, 4, 4, 3, 3, 3, 2, 2, 0}; //L'ordre de valorisation des lotissements, ici d'abord les 6 puis les 1
+    final static int[] valorisations_lotissement_optimales = new int[] {6, 6, 6, 6, 1, 5, 5, 5, 5, 2, 2, 3, 3, 3, 4, 4, 4, 4, 0}; //L'ordre de valorisation des lotissements, ici d'abord les 6 puis les 1
     final static int nombre_agents_necessaires = 5; //Le nombre d'agents immobiliers nécessaires pour mener à bien la stratégie
     final static int[] choix_barriere_optimale = new int[] {206, 106, 6, 110, 109, 108, 107, 9, 8, 7, 0}; //Les choix de placement de barrières dans l'ordre, ici pour former des lotissements 4x6 et 9x1
     final static int nombre_bis_max = 3;
@@ -110,11 +110,11 @@ public class Strat241 extends Strat{
 
         //PISCINES
         for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
-            if(action.get(pioche_idx) == 0 && meilleurEmplacementPiscine(numero.get(pioche_idx), plateau_ideal, possibilites_par_pioche.get(pioche_idx), j, joueur) >= 0){ //Si on trouve une piscine parfaitement placable, on la place.
+            if(action.get(pioche_idx) == 0 && meilleurEmplacementPiscine(numero.get(pioche_idx), possibilites_par_pioche.get(pioche_idx), j, joueur) >= 0){ //Si on trouve une piscine parfaitement placable, on la place.
                 res = pioche_idx;
                 bestPiocheFound = true;
 
-                emplacement_choisi = meilleurEmplacementPiscine(numero.get(pioche_idx), plateau_ideal, possibilites_par_pioche.get(pioche_idx), j, joueur);
+                emplacement_choisi = meilleurEmplacementPiscine(numero.get(pioche_idx), possibilites_par_pioche.get(pioche_idx), j, joueur);
 
                 System.out.println("################################## PISCINE " + emplacement_choisi);
             }
@@ -310,7 +310,7 @@ public class Strat241 extends Strat{
     }
 
     //Trouve le meilleur emplacement de piscine -> ce n'est pas la priorité, mais si ca tombe bien, on prend
-    public static int meilleurEmplacementPiscine(int numero, double[][] plateau_ideal, ArrayList<Integer> placeValide, Jeu j, int joueur) {
+    public static int meilleurEmplacementPiscine(int numero, ArrayList<Integer> placeValide, Jeu j, int joueur) {
         // Test rue 2
         int idx = findClosestIndexAvailable(numero, plateau_ideal[2], j, joueur);
         if (idx != -1 && Math.abs(numero - plateau_ideal[2][idx]) <= max_ecart && j.joueurs[joueur].ville.rues[2].maisons[idx].emplacementPiscine) {    //Si on trouve un indice, que l'écart est inférieur à 1, et qu'il y a un emplacement piscine
