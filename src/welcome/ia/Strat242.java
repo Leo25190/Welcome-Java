@@ -4,7 +4,7 @@
 
 Cette stratégie se base sur un plateau ideal, et cherche à placer les numéros en respectant ce plan.
 Lotissements : 4x6 et 9x1
-Scoree moyen : 87.7
+Scoree moyen : 95
 ########################################################
  */
 package welcome.ia;
@@ -24,8 +24,9 @@ public class Strat242 extends Strat{
     final static double[][] plateau_ideal = new double[][] {   //Création d'un plateau idéal
         {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
         {5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
-        {1, 4, 5.1, 6.2, 7.3, 8.4, 8.6, 9.7, 10.8, 11.9, 12, 15}
+        {3, 4, 5.1, 6.2, 7.3, 8.4, 8.6, 9.7, 10.8, 11.9, 13, 14}
     };
+    final static double max_ecart = 2.5;
     int[] pioche_choisie; // [0] = action, [1] = numero
     int emplacement_choisi; //Emplacement préférable
     int emplacement_gap;    //Emplacement d'un trou entre deux nombres si on en trouve un
@@ -42,8 +43,7 @@ public class Strat242 extends Strat{
     final static int[] nombre_parcs_max = new int[] {3, 4, 5};  //Le nombre max de parcs par rue
     final static int[] valorisations_lotissement_optimales = new int[] {6, 6, 6, 6, 1, 5, 5, 5, 5, 4, 4, 4, 4, 3, 3, 3, 2, 2, 0}; //L'ordre de valorisation des lotissements, ici d'abord les 6 puis les 5
     final static int nombre_agents_necessaires = 5; //Le nombre d'agents immobiliers nécessaires pour mener à bien la stratégie
-    final static int[] choix_barriere_optimale = new int[] {25, 15, 6, 17, 16, 15, 14, 7, 6, 5, 4, 0}; //Les choix de placement de barrières dans l'ordre, ici pour former des lotissements 3x6 et 3x5     TODO probleme barriere invalide deja arrivé
-    final static double max_ecart = 2;
+    final static int[] choix_barriere_optimale = new int[] {206, 106, 6, 110, 109, 108, 107, 9, 8, 7, 0}; //Les choix de placement de barrières dans l'ordre, ici pour former des lotissements 3x6 et 3x5
 
     public Strat242() {
         this.nombre_parcs = new int[3];
@@ -251,9 +251,12 @@ public class Strat242 extends Strat{
     //Forme des lotissements : 3x6 et 3x5
     @Override
     public int choixBarriere(Jeu j, int joueur,  ArrayList<Integer> placeValide){
-        int res = choix_barriere_optimale[nombre_barrieres];
+        int res = placeValide.indexOf(choix_barriere_optimale[nombre_barrieres]);
         if(nombre_barrieres < choix_barriere_optimale.length-1)
             nombre_barrieres++;
+
+        if(res < 0 || res > placeValide.size()-1)   //Par sécurité
+            res = 0;
         return res;
     }
     

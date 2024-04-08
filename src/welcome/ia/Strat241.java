@@ -4,7 +4,7 @@
 
 Cette stratégie se base sur un plateau ideal, et cherche à placer les numéros en respectant ce plan.
 Lotissements : 3x6 et 3x5
-Scoree moyen : 87.4
+Scoree moyen : 87
 ########################################################
  */
 package welcome.ia;
