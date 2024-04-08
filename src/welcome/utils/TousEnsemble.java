@@ -29,7 +29,6 @@ public class TousEnsemble extends Tournoi{
 
             for(int i = 0; i < this.participants.length; i++){
                 tousLesScores[i][h] = scorePartie[i];
-                System.out.println(tousLesScores[i][h]);
             }
 
             classement= new Integer[this.participants.length];
