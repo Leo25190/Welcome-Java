@@ -3,8 +3,8 @@
 -------------------STRATEGIE 241------------------------
 
 Cette stratégie se base sur un plateau ideal, et cherche à placer les numéros en respectant ce plan.
-Lotissements : 3x6 et 3x5
-Scoree moyen : 87
+Lotissements : 4x6 et 9x1
+Score moyen : 95
 ########################################################
  */
 package welcome.ia;
@@ -24,8 +24,9 @@ public class Strat241 extends Strat{
     final static double[][] plateau_ideal = new double[][] {   //Création d'un plateau idéal
         {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
         {5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
-        {1, 2.3, 3.5, 4.8, 6.1, 7.4, 8.6, 9.9, 11.2, 12.6, 13.7, 15}
+            {3, 4, 5.1, 6.2, 7.3, 8.4, 8.6, 9.7, 10.8, 11.9, 13, 14}
     };
+    final static double max_ecart = 2.5;  //Pour les fonctions de recherche de minimum pour la dernière rue
     int[] pioche_choisie; // [0] = action, [1] = numero
     int emplacement_choisi; //Emplacement préférable
     int emplacement_gap;    //Emplacement d'un trou entre deux nombres si on en trouve un
@@ -40,10 +41,9 @@ public class Strat241 extends Strat{
             {5, 8, 12}
     };
     final static int[] nombre_parcs_max = new int[] {3, 4, 5};  //Le nombre max de parcs par rue
-    final static int[] valorisations_lotissement_optimales = new int[] {6, 6, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4, 3, 3, 3, 2, 2, 1, 0}; //L'ordre de valorisation des lotissements, ici d'abord les 6 puis les 5
-    final static int nombre_agents_necessaires = 8; //Le nombre d'agents immobiliers nécessaires pour mener à bien la stratégie
-    final static int[] choix_barriere_optimale = new int[] {25, 15, 5, 0}; //Les choix de placement de barrières dans l'ordre, ici pour former des lotissements 3x6 et 3x5
-    final static double max_ecart = 1;  //Pour les fonctions de recherche de minimum pour la dernière rue
+    final static int[] valorisations_lotissement_optimales = new int[] {6, 6, 6, 6, 1, 5, 5, 5, 5, 4, 4, 4, 4, 3, 3, 3, 2, 2, 0}; //L'ordre de valorisation des lotissements, ici d'abord les 6 puis les 1
+    final static int nombre_agents_necessaires = 5; //Le nombre d'agents immobiliers nécessaires pour mener à bien la stratégie
+    final static int[] choix_barriere_optimale = new int[] {206, 106, 6, 110, 109, 108, 107, 9, 8, 7, 0}; //Les choix de placement de barrières dans l'ordre, ici pour former des lotissements 4x6 et 9x1
 
     public Strat241() {
         this.nombre_parcs = new int[3];
@@ -111,19 +111,6 @@ public class Strat241 extends Strat{
             }
         }
 
-        //AGENTS IMMOBILIERS
-        for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
-            if(action.get(pioche_idx) == 4 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0 && nombre_agents < nombre_agents_necessaires){
-                res = pioche_idx;
-                bestPiocheFound = true;
-
-                emplacement_choisi = meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
-
-                System.out.println("################################## AGENT " + emplacement_choisi);
-
-            }
-        }
-
         //BARRIERES
         for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
             if(action.get(pioche_idx) == 5 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0 && nombre_barrieres < choix_barriere_optimale.length-1){
@@ -151,8 +138,18 @@ public class Strat241 extends Strat{
             }
         }
 
+        //AGENTS IMMOBILIERS
+        for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
+            if(action.get(pioche_idx) == 4 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0 && nombre_agents < nombre_agents_necessaires){
+                res = pioche_idx;
+                bestPiocheFound = true;
 
+                emplacement_choisi = meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
 
+                System.out.println("################################## AGENT " + emplacement_choisi);
+
+            }
+        }
 
         //CAS PAR DEFAUT
         //Si on ne trouve pas de carte action utilisable, on cherche le meilleur numero à placer
@@ -253,9 +250,12 @@ public class Strat241 extends Strat{
     //Forme des lotissements : 3x6 et 3x5
     @Override
     public int choixBarriere(Jeu j, int joueur,  ArrayList<Integer> placeValide){
-        int res = choix_barriere_optimale[nombre_barrieres];
+        int res = placeValide.indexOf(choix_barriere_optimale[nombre_barrieres]);
         if(nombre_barrieres < choix_barriere_optimale.length-1)
             nombre_barrieres++;
+
+        if(res < 0 || res > placeValide.size()-1)   //Par sécurité
+            res = 0;
         return res;
     }
     
@@ -429,13 +429,13 @@ public class Strat241 extends Strat{
         return full;
     }
 
-    public static int isGap(Jeu j, int joueur){
+    public static int isGap(Jeu j, int joueur){     //TODO ne semble pas marcher
         for(int rue_idx = 2; rue_idx >= 0; rue_idx--){
             for(int i = 1; i < j.joueurs[joueur].ville.rues[rue_idx].taille-1; i++){
                 int num_pre = j.joueurs[joueur].ville.rues[rue_idx].maisons[i-1].numero; //numéro maison précédente
                 int num_post = j.joueurs[joueur].ville.rues[rue_idx].maisons[i+1].numero; //numéro maison suivante
                 int num_act = j.joueurs[joueur].ville.rues[rue_idx].maisons[i].numero; //numéro maison actuelle
-                if(num_post - num_pre == 1 && num_pre != -1 && num_post != -1 && num_act == -1){ //Si les deux maisons adjacentes sont occupées, que la maison est dispo et que l'écart entre les deux vaut 1
+                if(num_act == -1 && num_pre != -1 && num_post != -1){ //Si les deux maisons adjacentes sont occupées, que la maison est dispo
                     return 100*rue_idx + i;
                 }
             }
