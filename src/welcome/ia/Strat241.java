@@ -20,12 +20,12 @@ public class Strat241 extends Strat{
     int[] nombre_parcs; //Compte le nombre de parcs par ligne
     int nombre_agents;  //Compte le nombre d'agents immobilisers utilisés
     int nombre_barrieres;   //Compte le nombre de barrières placées
-    int nombre_bis; //compte les bis
+    static int nombre_bis; //compte les bis
 
     final static double[][] plateau_ideal = new double[][] {   //Création d'un plateau idéal
         {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
         {5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
-            {3, 4, 5.1, 6.2, 7.3, 8.4, 8.6, 9.7, 10.8, 11.9, 13, 14}
+        {3.4, 4.4, 5.4, 6.4, 7.4, 8.4, 8.6, 9.6, 10.6, 11.6, 12.6, 13.6}
     };
     final static double max_ecart = 2.5;  //Pour les fonctions de recherche de minimum pour la dernière rue
     int[] pioche_choisie; // [0] = action, [1] = numero
@@ -66,7 +66,7 @@ public class Strat241 extends Strat{
         return "JulesLaBulle1";
     }
     
-    //Choisir au hasard parmi les 3 numéros dispos
+    //Choisit la meilleure pioche
     @Override
     public int choixCombinaison(Jeu j, int joueur){
         int res = -1;
@@ -86,21 +86,27 @@ public class Strat241 extends Strat{
             numero.add(((Travaux)j.numeros[pioche_idx].top()).getNumero());
         }
 
+        //On parcourt les pioches pour chaque carte action qui nous interresse selon l'ordre de priorité suivant
         boolean bestPiocheFound = false;
 
+        //BIS TODO -> Ne fonctionne pas bien, fait perdre 3pts
+        /*
         //BIS POUR COMBLER LES GAPS
         for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
-            if(action.get(pioche_idx) == 3 &&  isGap(j, joueur)>= 0 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur)>=0 && nombre_bis < nombre_bis_max){
+            if(action.get(pioche_idx) == 3 &&  isGap(j, joueur)>= 0 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur)>=0 && nombre_bis <= nombre_bis_max){
                 res = pioche_idx;
                 bestPiocheFound = true;
 
                 emplacement_choisi = meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
                 emplacement_gap = isGap(j, joueur);
+                nombre_bis++;
 
                 System.out.println("################################## BIS " + emplacement_choisi + " // GAP " + emplacement_gap);
 
             }
         }
+        /*
+         */
 
         //PISCINES
         for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
@@ -109,7 +115,6 @@ public class Strat241 extends Strat{
                 bestPiocheFound = true;
 
                 emplacement_choisi = meilleurEmplacementPiscine(numero.get(pioche_idx), plateau_ideal, possibilites_par_pioche.get(pioche_idx), j, joueur);
-                nombre_bis++;
 
                 System.out.println("################################## PISCINE " + emplacement_choisi);
             }
@@ -166,14 +171,14 @@ public class Strat241 extends Strat{
                 meilleurs_emplacements_trouves[i] = meilleurEmplacementDefault(possibilites_par_pioche.get(i), numero.get(i), j, joueur);
             }
 
-            for(int i = 0; i < meilleurs_emplacements_trouves.length; i++){
+            for(int i = 0; i < meilleurs_emplacements_trouves.length; i++){     //Recherche le maximum des emplacements trouvés afin de prioriser la rue du bas
                 if(max_emplacement < meilleurs_emplacements_trouves[i]){
                     max_emplacement = meilleurs_emplacements_trouves[i];
                     max_emplacement_idx = i;
                 }
             }
 
-            if(max_emplacement != -1){
+            if(max_emplacement != -1){  //Si le maximum est différent de -1, alors on a trouvé au moins un emplacement interressant
                 res = max_emplacement_idx;
                 emplacement_choisi = max_emplacement;
                 bestPiocheFound = true;
@@ -184,6 +189,7 @@ public class Strat241 extends Strat{
         }
 
         //INTERIMAIRES
+        //Dans le cas ou on ne trouve rien, on essaie pour chaque valeur des cartes interimaires
         for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
             if(action.get(pioche_idx) == 1 && meilleurEmplacementInterimaire(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0){
                 res = pioche_idx;
@@ -196,8 +202,12 @@ public class Strat241 extends Strat{
             }
         }
 
-        if(res<0 || res>2)
+        //Si rien n'est trouvé malgré tout -> Refus de Permis ou plateau rempli
+        if(res<0 || res>2) {
             res = RandomSingleton.getInstance().nextInt(3);
+
+            System.out.println("################################## RAMDOM " + res);
+        }
 
         pioche_choisie[0] = ((Travaux)j.numeros[res].top()).getNumero();
         pioche_choisie[1] = ((Travaux)j.actions[res].top()).getAction();
@@ -210,7 +220,7 @@ public class Strat241 extends Strat{
     public int choixBis(Jeu j, int joueur, ArrayList<Integer> placeValide){
         int res=0;
         
-        if(emplacement_gap != -1) {
+        if(emplacement_gap != -1) {     //Emplacement déjà choisi
             res = placeValide.indexOf(emplacement_gap);
             emplacement_gap = -1;
         }
@@ -226,10 +236,10 @@ public class Strat241 extends Strat{
             res = placeValide.indexOf(emplacement_choisi); //on récupère l'index de l'emplacement chosi dans placeValide
         }
         else{
-            res = meilleurEmplacementDefault(placeValide, numero, j, joueur);
+            res = meilleurEmplacementDefault(placeValide, numero, j, joueur);   //Si il n'existe pas, dans le doute on réessaie de trouver un emplacement
         }
 
-        if(res<0 || res>placeValide.size()-1)
+        if(res<0 || res>placeValide.size()-1)   //-> Refus de permis
             res=RandomSingleton.getInstance().nextInt(placeValide.size());
         return res;
     }
@@ -241,7 +251,7 @@ public class Strat241 extends Strat{
         return res;
     }
     
-    //Valorise en priorité les 6 puis les 5
+    //Valorise en priorité les 6 puis les 1
     @Override
     public int valoriseLotissement(Jeu j, int joueur){
         int res = valorisations_lotissement_optimales[nombre_agents];
@@ -251,7 +261,7 @@ public class Strat241 extends Strat{
         return res;
     }
     
-    //Forme des lotissements : 3x6 et 3x5
+    //Forme des lotissements : 4x6 et 9x1
     @Override
     public int choixBarriere(Jeu j, int joueur,  ArrayList<Integer> placeValide){
         int res = placeValide.indexOf(choix_barriere_optimale[nombre_barrieres]);
@@ -263,7 +273,7 @@ public class Strat241 extends Strat{
         return res;
     }
     
-    //Valide toujours un plan
+    //Valide toujours un plan si possible
     @Override
     public boolean validePlan(Jeu j, int joueur, int plan) {
         return true;
@@ -279,6 +289,7 @@ public class Strat241 extends Strat{
 
     // --------- MES FONCTIONS ----------
 
+    //Récupéré de Jeu.java pour générer les possibilités pour chaque pioche
     private ArrayList<Integer> construirePossibilite(int numero, Joueur joueur){
         int min; // Variable utiles
         ArrayList<Integer> possibilite= new ArrayList(); //List des possibilités Ã  construire
@@ -298,6 +309,7 @@ public class Strat241 extends Strat{
         return possibilite;
     }
 
+    //Trouve le meilleur emplacement de piscine -> ce n'est pas la priorité, mais si ca tombe bien, on prend
     public static int meilleurEmplacementPiscine(int numero, double[][] plateau_ideal, ArrayList<Integer> placeValide, Jeu j, int joueur) {
         // Test rue 2
         int idx = findClosestIndexAvailable(numero, plateau_ideal[2], j, joueur);
@@ -325,6 +337,7 @@ public class Strat241 extends Strat{
         return -1; // Aucun emplacement optimal trouvé
     }
 
+    //Trouve le meilleur emplacement de parcs en fonction du nombre de parcs posés par rue
     public static int meilleurEmplacementParc(int[] nombre_parcs, ArrayList<Integer> placeValide, int numero, Jeu j, int joueur){
         //Rue 2
         int idx = findClosestIndexAvailable(numero, plateau_ideal[2], j, joueur);
@@ -351,6 +364,7 @@ public class Strat241 extends Strat{
         return -1; //Aucun emplacement trouvé
     }
 
+    //Cherche un emplacement pour toutes les valeurs possibles de la carte intérimaire
     public static int meilleurEmplacementInterimaire(ArrayList<Integer> placeValide, int numero, Jeu j, int joueur){
         ArrayList<Integer> emplacements_trouves = new ArrayList<>();
         ArrayList<Integer> ecarts_necessaires = new ArrayList<>();
@@ -380,6 +394,7 @@ public class Strat241 extends Strat{
         }
     }
 
+    //Trouve le meilleur emplacement pour un numéro
     public static int meilleurEmplacementDefault(ArrayList<Integer> placeValide, int numero, Jeu j, int joueur){
         // Rue 2
         int idxRue2 = findClosestIndexAvailable(numero, plateau_ideal[2], j, joueur);
@@ -405,7 +420,8 @@ public class Strat241 extends Strat{
         return -1; // Aucun emplacement trouvé
     }
 
-    public static int findClosestIndexAvailable(int numero, double[] rue, Jeu j, int joueur) { //Trouve ou placer le nombre pour minimiser l'écart avec le plateau ideal dans la rue 2, renvoie -1 si c'est impossible
+    //Cherche l'indice dans la rue 2 qui minimise l'écart entre le numero donné et le plateau ideal
+    public static int findClosestIndexAvailable(int numero, double[] rue, Jeu j, int joueur) {
         int idx = -1;
         if (!isFull(j.joueurs[joueur].ville.rues[2])) {
             double min = Double.MAX_VALUE; // Initialiser min avec une valeur grande
@@ -422,6 +438,7 @@ public class Strat241 extends Strat{
         return idx;
     }
 
+    //Check si une rue est pleine
     public static boolean isFull(Rue rue){ //indique si une rue est pleine
         boolean full = true;
         for(int i = 0; i < rue.taille; i++){
@@ -433,13 +450,15 @@ public class Strat241 extends Strat{
         return full;
     }
 
-    public static int isGap(Jeu j, int joueur){     //TODO ne semble pas marcher
+    //Cherche un trou entre deux nombres
+    public static int isGap(Jeu j, int joueur){
         for(int rue_idx = 2; rue_idx >= 0; rue_idx--){
             for(int i = 1; i < j.joueurs[joueur].ville.rues[rue_idx].taille-1; i++){
                 int num_pre = j.joueurs[joueur].ville.rues[rue_idx].maisons[i-1].numero; //numéro maison précédente
                 int num_post = j.joueurs[joueur].ville.rues[rue_idx].maisons[i+1].numero; //numéro maison suivante
                 int num_act = j.joueurs[joueur].ville.rues[rue_idx].maisons[i].numero; //numéro maison actuelle
                 if(num_act == -1 && num_pre != -1 && num_post != -1){ //Si les deux maisons adjacentes sont occupées, que la maison est dispo
+                    System.out.println("################################################################# " + num_pre + " // " + num_act + " // " + num_post + " // NBR " + nombre_bis);
                     return 100*rue_idx + i;
                 }
             }
