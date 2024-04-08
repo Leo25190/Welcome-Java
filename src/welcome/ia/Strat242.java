@@ -180,7 +180,6 @@ public class Strat242 extends Strat{
         }
 
         //INTERIMAIRES
-        //TODO ca change pas grand chose, étudier ce qui peut etre amelioré
         for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
             if(action.get(pioche_idx) == 1 && meilleurEmplacementInterimaire(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0){
                 res = pioche_idx;
