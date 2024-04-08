@@ -13,11 +13,12 @@ import java.util.Collections;
 public class Strat88 extends Strat{
     private double[][] basePositions;
     private int emplacementMaisonIndex;
-    private final double[] ecartParametre = {0, 0, 0.99};
+    private final double[] ecartParametre = {4, 3, 1};
+    private final double[] probabilites = {3./81, 3./81, 4./81, 5./81, 6./81, 7./81, 8./81, 9./81, 8./81, 7./81, 6./81, 5./81, 4./81, 3./81, 3./81};
 
     public Strat88(){
-        basePositions = new double[][] {    {6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
-                                            {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
+        basePositions = new double[][] {    {2.73, 5.73, 7.6, 9, 10, 11, 12, 13, 14, 15},
+                                            {1, 2, 3, 4, 5, 6, 7, 8.2, 9.49, 11.2, 13.69},
                                             {1.67, 3.52, 4.78, 5.89, 6.85, 7.67, 8.33, 9.15, 10.11, 11.22, 12.48, 14.33}};
         emplacementMaisonIndex = -1;
 
@@ -39,8 +40,21 @@ public class Strat88 extends Strat{
         int[] numeros = new int[]{((Travaux) j.numeros[0].top()).getNumero(), ((Travaux) j.numeros[1].top()).getNumero(), ((Travaux) j.numeros[2].top()).getNumero()};
         int[] classementIndex = trierNumerosIndex(numeros);
 
+
         //Tests pour vérifier si la carte choisie est plaçable
         for (int i = 0 ; i < 3 ; i++) {
+            for (int k = 0 ; k < 3 ; k++) {
+                Travaux action = (Travaux) j.actions[classementIndex[k]].top();
+                if (action.action == 3) {
+                    int numeroActuel = numeros[classementIndex[k]];
+                    ArrayList<Integer> placesValides = construirePossibilite(numeroActuel, j.joueurs[joueur]);
+                    emplacementMaisonIndex = getEmplacementMaison(numeroActuel, placesValides);
+                    if (emplacementMaisonIndex != -1) {
+                        return classementIndex[k];
+                    }
+                }
+            }
+
             //On cherche l'emplacement de la maison correspondant à nos critères. Si elle ne peut être placée, on met emplacementMaison à - 1
             int numeroActuel = numeros[classementIndex[i]];
             ArrayList<Integer> placesValides = construirePossibilite(numeroActuel, j.joueurs[joueur]);
@@ -96,14 +110,53 @@ public class Strat88 extends Strat{
             return -1;
         }
 
-        for (int i = placesValides.size() - 1 ; i >= 0 ; i--) {
+        ArrayList<Integer> placesRues0 = getPossibilitesByRue(placesValides, 0);
+        ArrayList<Integer> placesRues1 = getPossibilitesByRue(placesValides, 1);
+        ArrayList<Integer> placesRues2 = getPossibilitesByRue(placesValides, 2);
+        double ecart = 100;
+        int index = -1;
+
+        for (int i = 0 ; i < placesRues2.size() ; i++) {
+            double tempEcart =  Math.abs(basePositions[2][placesRues2.get(i) % 100] - numero);
+            if (tempEcart < ecart && tempEcart <= ecartParametre[2] * (3 * (1 - probabilites[numero - 1]))) {
+                ecart = tempEcart;
+                index = placesValides.indexOf(placesRues2.get(i));
+            }
+        }
+        if (ecart != 100) {
+            return index;
+        }
+
+        for (int i = 0 ; i < placesRues1.size() ; i++) {
+            double tempEcart =  Math.abs(basePositions[1][placesRues1.get(i) % 100] - numero);
+            if (tempEcart < ecart && tempEcart < ecartParametre[1]) {
+                ecart = tempEcart;
+                index = placesValides.indexOf(placesRues1.get(i));
+            }
+        }
+        if (ecart != 100) {
+            return index;
+        }
+
+        for (int i = 0 ; i < placesRues0.size() ; i++) {
+            double tempEcart =  Math.abs(basePositions[0][placesRues0.get(i) % 100] - numero);
+            if (tempEcart < ecart && tempEcart < ecartParametre[0]) {
+                ecart = tempEcart;
+                index = placesValides.indexOf(placesRues0.get(i));
+            }
+        }
+        if (ecart != 100) {
+            return index;
+        }
+
+        /*for (int i = placesValides.size() - 1 ; i >= 0 ; i--) {
             int rue = placesValides.get(i) / 100;
             int emplacement = placesValides.get(i) % 100;
             double ecart = Math.abs(basePositions[rue][emplacement] - numero);
             if (ecart <= ecartParametre[rue]) {
                 return i;
             }
-        }
+        }*/
 
         return -1;
     }
@@ -153,5 +206,24 @@ public class Strat88 extends Strat{
             }
         }
         return possibilite;
+    }
+
+    public static ArrayList<Integer> getPossibilitesByRue(ArrayList<Integer> possibilites, int rue){
+        ArrayList<Integer> possibilitesByRue = new ArrayList<>();
+        for (int i = 0; i < possibilites.size(); i++) {
+            if (possibilites.get(i) / 100 == rue) {
+                possibilitesByRue.add(possibilites.get(i));
+            }
+        }
+        return possibilitesByRue;
+    }
+
+    public static int getIndexOfPossibilite(ArrayList<Integer> possibilites, int emplacement){
+        for (int i = 0; i < possibilites.size(); i++) {
+            if (possibilites.get(i) == emplacement) {
+                return i;
+            }
+        }
+        return -1;
     }
 }
