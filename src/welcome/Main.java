@@ -20,7 +20,7 @@ public class Main {
     
     public static void exempleLanceIA() {
         try{
-            TousEnsemble t = new TousEnsemble(new int[] {241, 242}, 10000);
+            TousEnsemble t = new TousEnsemble(new int[] {241}, 100000);
             t.run();
         }        
         catch(Exception e){
