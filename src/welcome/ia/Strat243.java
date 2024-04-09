@@ -21,7 +21,7 @@ import java.util.Collections;
 
 public class Strat243 extends Strat{
     // bot de la mort qui tue
-    final boolean affichage_decisions = true;
+    final boolean affichage_decisions = false;
     int[] nombre_parcs; //Compte le nombre de parcs par ligne
     int nombre_agents;  //Compte le nombre d'agents immobilisers utilisés
     int nombre_barrieres;   //Compte le nombre de barrières placées
@@ -33,7 +33,6 @@ public class Strat243 extends Strat{
             {3.4, 4.4, 5.4, 6.4, 7.4, 8.4, 8.6, 9.6, 10.6, 11.6, 12.6, 13.6}
     };
     final static double max_ecart = 2.5;  //Pour les fonctions de recherche de minimum pour la dernière rue
-    int[] pioche_choisie; // [0] = action, [1] = numero
     int emplacement_choisi; //Emplacement préférable
     int emplacement_gap;    //Emplacement d'un trou entre deux nombres si on en trouve un
     static int valeur_interimaire; //Valeur ajoutée au numéro dans le cas d'un intérimaire
@@ -49,7 +48,10 @@ public class Strat243 extends Strat{
     final static int[] nombre_parcs_max = new int[] {3, 4, 5};  //Le nombre max de parcs par rue
     static int[] valorisations_lotissement_optimales; //L'ordre de valorisation des lotissements, ici d'abord les 6 puis les 1
     static int nombre_agents_necessaires; //Le nombre d'agents immobiliers nécessaires pour mener à bien la stratégie
+
+    //Variables pour les bis, non utilisées car n'améliore pas le score
     final static int nombre_bis_max = 3;
+    final static double taux_remplissage_min_pour_bis = 0.95;
 
     //Gestion des plans
     ArrayList<Plan> plans = new ArrayList<>();
@@ -63,8 +65,6 @@ public class Strat243 extends Strat{
         this.nombre_barrieres = 0;
         this.nombre_bis = 0;
         this.premier_tour = true;
-
-        this.pioche_choisie = new int[2];
     }
 
     @Override
@@ -85,12 +85,18 @@ public class Strat243 extends Strat{
         emplacement_gap = -1;
         valeur_interimaire = 0;
 
-        for(int pioche_idx = 0; pioche_idx < j.plans.length && premier_tour; pioche_idx++){    //Au premier tour, on récupère les plans;
-            plans.add(j.plans[pioche_idx]);
-            if(affichage_decisions)
-                System.out.println("\n#################################################################### " + plans.getLast());
+        if(premier_tour){
+            for(int pioche_idx = 0; pioche_idx < j.plans.length; pioche_idx++){    //Au premier tour, on récupère les plans;
+                plans.add(j.plans[pioche_idx]);
+                if(affichage_decisions)
+                    System.out.println("#################################################################### " + plans.getLast());
+            }
+            System.out.println();
+            premier_tour = false;
         }
-        premier_tour = false;
+
+        if(affichage_decisions)
+            System.out.println("REMPLISSAGE " + remplissagePlateau(j, joueur)*100 + " %");
 
         //Choix des emplacements de barrières en fonction des plans
         //Plan le plus interressant
@@ -107,22 +113,23 @@ public class Strat243 extends Strat{
         }
 
         ArrayList<ArrayList> possibilites_par_pioche = new ArrayList<>();
-        ArrayList<Integer> action = new ArrayList<>();
-        ArrayList<Integer> numero = new ArrayList<>();
+        ArrayList<Integer> actions = new ArrayList<>();
+        ArrayList<Integer> numeros = new ArrayList<>();
 
         for(int pioche_idx = 0; pioche_idx < 3; pioche_idx++){ //Construction des possibilités et des tableaux action et numero
 
             possibilites_par_pioche.add(construirePossibilite(((Travaux)j.numeros[pioche_idx].top()).getNumero(), j.joueurs[joueur])); //On a toutes les possibilités pour chaque pioche
 
-            action.add(((Travaux)j.actions[pioche_idx].top()).getAction());
-            numero.add(((Travaux)j.numeros[pioche_idx].top()).getNumero());
+            actions.add(((Travaux)j.actions[pioche_idx].top()).getAction());
+            numeros.add(((Travaux)j.numeros[pioche_idx].top()).getNumero());
         }
 
         //On parcourt les pioches pour chaque carte action qui nous interresse selon l'ordre de priorité suivant
         boolean bestPiocheFound = false;
 
-        //BIS POUR COMBLER LES GAPS
-        for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound && remplissagePlateau(j, joueur) > 0.6; pioche_idx++){   //On cherche à combler les trous seulement si le plateau est déja bien rempli TODO
+        //BIS POUR COMBLER LES GAPS -> N'améliore pas le score malgré tout
+        /*
+        for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound && remplissagePlateau(j, joueur) > taux_remplissage_min_pour_bis; pioche_idx++){   //On cherche à combler les trous seulement si le plateau est déja bien rempli
             if(action.get(pioche_idx) == 3 &&  isGap(j, joueur)>= 0 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur)>=0 && nombre_bis <= nombre_bis_max){
                 res = pioche_idx;
                 bestPiocheFound = true;
@@ -136,28 +143,15 @@ public class Strat243 extends Strat{
 
             }
         }
-
-
-        //PISCINES
-        for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
-            if(action.get(pioche_idx) == 0 && meilleurEmplacementPiscine(numero.get(pioche_idx), possibilites_par_pioche.get(pioche_idx), j, joueur) >= 0){ //Si on trouve une piscine parfaitement placable, on la place.
-                res = pioche_idx;
-                bestPiocheFound = true;
-
-                emplacement_choisi = meilleurEmplacementPiscine(numero.get(pioche_idx), possibilites_par_pioche.get(pioche_idx), j, joueur);
-
-                if(affichage_decisions)
-                    System.out.println("################################## PISCINE " + emplacement_choisi);
-            }
-        }
+        */
 
         //PARCS
         for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
-            if(action.get(pioche_idx) == 3 && meilleurEmplacementParc(nombre_parcs, possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0){  //Si on trouve un parc parfaitement placable, on le place.
+            if(actions.get(pioche_idx) == 3 && meilleurEmplacementParc(nombre_parcs, possibilites_par_pioche.get(pioche_idx), numeros.get(pioche_idx), j, joueur) >= 0){  //Si on trouve un parc parfaitement placable, on le place.
                 res = pioche_idx;
                 bestPiocheFound = true;
 
-                emplacement_choisi = meilleurEmplacementParc(nombre_parcs, possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
+                emplacement_choisi = meilleurEmplacementParc(nombre_parcs, possibilites_par_pioche.get(pioche_idx), numeros.get(pioche_idx), j, joueur);
                 nombre_parcs[emplacement_choisi/100]++; //On ajoute le parc au compte sur la bonne ligne
 
                 if(affichage_decisions)
@@ -166,13 +160,26 @@ public class Strat243 extends Strat{
             }
         }
 
-        //BARRIERES
+        //PISCINES
         for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
-            if(action.get(pioche_idx) == 5 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0 && nombre_barrieres < choix_barriere_optimale.length-1){
+            if(actions.get(pioche_idx) == 0 && meilleurEmplacementPiscine(numeros.get(pioche_idx), possibilites_par_pioche.get(pioche_idx), j, joueur) >= 0){ //Si on trouve une piscine parfaitement placable, on la place.
                 res = pioche_idx;
                 bestPiocheFound = true;
 
-                emplacement_choisi = meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
+                emplacement_choisi = meilleurEmplacementPiscine(numeros.get(pioche_idx), possibilites_par_pioche.get(pioche_idx), j, joueur);
+
+                if(affichage_decisions)
+                    System.out.println("################################## PISCINE " + emplacement_choisi);
+            }
+        }
+
+        //BARRIERES
+        for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
+            if(actions.get(pioche_idx) == 5 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numeros.get(pioche_idx), j, joueur) >= 0 && nombre_barrieres < choix_barriere_optimale.length-1){
+                res = pioche_idx;
+                bestPiocheFound = true;
+
+                emplacement_choisi = meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numeros.get(pioche_idx), j, joueur);
 
                 if(affichage_decisions)
                     System.out.println("################################## BARRIERE " + emplacement_choisi);
@@ -182,11 +189,11 @@ public class Strat243 extends Strat{
 
         //AGENTS IMMOBILIERS
         for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
-            if(action.get(pioche_idx) == 4 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0 && nombre_agents < nombre_agents_necessaires){
+            if(actions.get(pioche_idx) == 4 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numeros.get(pioche_idx), j, joueur) >= 0 && nombre_agents < nombre_agents_necessaires){
                 res = pioche_idx;
                 bestPiocheFound = true;
 
-                emplacement_choisi = meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
+                emplacement_choisi = meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numeros.get(pioche_idx), j, joueur);
 
                 if(affichage_decisions)
                     System.out.println("################################## AGENT " + emplacement_choisi);
@@ -202,7 +209,7 @@ public class Strat243 extends Strat{
             int max_emplacement_idx = -1;
 
             for(int i = 0; i < 3; i++){     //Trouve le meilleur emplacement pour chaque pioche
-                meilleurs_emplacements_trouves[i] = meilleurEmplacementDefault(possibilites_par_pioche.get(i), numero.get(i), j, joueur);
+                meilleurs_emplacements_trouves[i] = meilleurEmplacementDefault(possibilites_par_pioche.get(i), numeros.get(i), j, joueur);
             }
 
             for(int i = 0; i < meilleurs_emplacements_trouves.length; i++){     //Recherche le maximum des emplacements trouvés afin de prioriser la rue du bas
@@ -226,14 +233,14 @@ public class Strat243 extends Strat{
         //INTERIMAIRES
         //Dans le cas ou on ne trouve rien, on essaie pour chaque valeur des cartes interimaires
         for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
-            if(action.get(pioche_idx) == 1 && meilleurEmplacementInterimaire(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur) >= 0){
+            if(actions.get(pioche_idx) == 1 && meilleurEmplacementInterimaire(numeros.get(pioche_idx), j, joueur) >= 0){
                 res = pioche_idx;
                 bestPiocheFound = true;
 
-                emplacement_choisi = meilleurEmplacementInterimaire(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
+                emplacement_choisi = meilleurEmplacementInterimaire(numeros.get(pioche_idx), j, joueur);
 
                 if(affichage_decisions)
-                    System.out.println("################################## INTERIMAIRE " + emplacement_choisi + " // ECART : " + valeur_interimaire + " // NUMERO : " + numero.get(pioche_idx));
+                    System.out.println("################################## INTERIMAIRE " + emplacement_choisi + " // ECART : " + valeur_interimaire + " // NUMERO : " + numeros.get(pioche_idx));
 
             }
         }
@@ -245,9 +252,6 @@ public class Strat243 extends Strat{
             if(affichage_decisions)
                 System.out.println("################################## RAMDOM " + res);
         }
-
-        pioche_choisie[0] = ((Travaux)j.numeros[res].top()).getNumero();
-        pioche_choisie[1] = ((Travaux)j.actions[res].top()).getAction();
 
         return res;
     }
@@ -329,7 +333,7 @@ public class Strat243 extends Strat{
     // --------- MES FONCTIONS ----------
 
     //Récupéré de Jeu.java pour générer les possibilités pour chaque pioche
-    private ArrayList<Integer> construirePossibilite(int numero, Joueur joueur){
+    private static ArrayList<Integer> construirePossibilite(int numero, Joueur joueur){
         int min; // Variable utiles
         ArrayList<Integer> possibilite= new ArrayList(); //List des possibilités Ã  construire
         for(int i=0; i<3; i++){//Pour chaque rue
@@ -400,13 +404,17 @@ public class Strat243 extends Strat{
     }
 
     //Cherche un emplacement pour toutes les valeurs possibles de la carte intérimaire
-    public static int meilleurEmplacementInterimaire(ArrayList<Integer> placeValide, int numero, Jeu j, int joueur){
+    public static int meilleurEmplacementInterimaire(int numero, Jeu j, int joueur){
         ArrayList<Integer> emplacements_trouves = new ArrayList<>();
         ArrayList<Integer> ecarts_necessaires = new ArrayList<>();
-        int erreurs_trouvees = 0;
+        ArrayList<ArrayList<Integer>> placesValides = new ArrayList<>();
+
+        for(int i = -2; i <= 2; i++){
+            placesValides.add(construirePossibilite(numero + i, j.joueurs[joueur]));
+        }
 
         for(int i = -2; i <= 2; i++){   //Pour toutes les valeurs que peut prendre la carte intérimaire
-            emplacements_trouves.add(meilleurEmplacementDefault(placeValide, numero+i, j, joueur)); //Trouver le meilleur emplacelement
+            emplacements_trouves.add(meilleurEmplacementDefault(placesValides.get(i+2), numero+i, j, joueur)); //Trouver le meilleur emplacelement
             ecarts_necessaires.add(i);
         }
 
@@ -495,20 +503,27 @@ public class Strat243 extends Strat{
                     return 100*rue_idx + i;
                 }
             }
+
+            int num_dernier = j.joueurs[joueur].ville.rues[rue_idx].maisons[plateau_ideal[rue_idx].length-1].numero;
+            int num_avant_dernier = j.joueurs[joueur].ville.rues[rue_idx].maisons[plateau_ideal[rue_idx].length-2].numero;
+            if(num_dernier == -1 && num_avant_dernier != -1){   //Check les derniers emplacements des rues
+                return 100*rue_idx + (plateau_ideal[rue_idx].length - 1);
+            }
         }
         return -1;
     }
 
-    //Donne le remplissage du plateau entre 0 et 1
-    public static double remplissagePlateau(Jeu j, int joueur){
+    //Donne le taux de remplissage du plateau entre 0 et 1
+    public static double remplissagePlateau(Jeu j, int joueur) {
         int nombre_places_vides = 0;
         final int nombre_places_total = 33;
-        for(int rue_idx = 0; rue_idx < 3; rue_idx++){
-            for(int maison_idx = 0; maison_idx < plateau_ideal[rue_idx].length; maison_idx++){
-                if(j.joueurs[joueur].ville.rues[rue_idx].maisons[maison_idx].numero == -1)
+        for (int rue_idx = 0; rue_idx < 3; rue_idx++) {
+            for (int maison_idx = 0; maison_idx < plateau_ideal[rue_idx].length; maison_idx++) {
+                if (j.joueurs[joueur].ville.rues[rue_idx].maisons[maison_idx].numero == -1) {
                     nombre_places_vides++;
+                }
             }
         }
-        return (double)(nombre_places_vides / nombre_places_total);
+        return 1 - (double) nombre_places_vides / nombre_places_total; // Effectuer une division avec des nombres à virgule flottante
     }
 }
