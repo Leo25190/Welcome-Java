@@ -4,10 +4,7 @@
 
 Cette stratégie se base sur un plateau ideal, et cherche à placer les numéros en respectant ce plan.
 Lotissements : 4x6 et 9x1
-Score moyen : 95
-
-Copie de strat241 pour implémenter la gestion des objectifs
-voir Jeu.java ligne 669
+Score moyen : 103
 ########################################################
  */
 package welcome.ia;
