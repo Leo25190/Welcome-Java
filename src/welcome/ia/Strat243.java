@@ -26,7 +26,6 @@ public class Strat243 extends Strat{
     int nombre_agents;  //Compte le nombre d'agents immobilisers utilisés
     int nombre_barrieres;   //Compte le nombre de barrières placées
     static int nombre_bis; //compte les bis
-    int nombre_plans_valides;   //Compte les plans validés afin de ne pas finir la partie
 
     final static double[][] plateau_ideal = new double[][] {   //Création d'un plateau idéal
             {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
@@ -63,7 +62,6 @@ public class Strat243 extends Strat{
         this.nombre_agents = 0;
         this.nombre_barrieres = 0;
         this.nombre_bis = 0;
-        this.nombre_plans_valides = 0;
         this.premier_tour = true;
 
         this.pioche_choisie = new int[2];
@@ -95,28 +93,16 @@ public class Strat243 extends Strat{
         premier_tour = false;
 
         //Choix des emplacements de barrières en fonction des plans
-        //1
-        if(Arrays.equals(plans.getFirst().tailleLotissements, new int[] {5, 5})){
-            choix_barriere_optimale = new int[] {206, 106, 5, 0};
-            valorisations_lotissement_optimales = new int[] {6, 6, 6, 6, 5, 5, 5, 5, 1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 0};
-            nombre_agents_necessaires = 8;
-        }
-        //2
-        else if(Arrays.equals(plans.getFirst().tailleLotissements, new int[] {2, 2, 2, 2})){
-            choix_barriere_optimale = new int[] {206, 106, 6, 8, 108, 110, 0};
-            valorisations_lotissement_optimales = new int[] {6, 6, 6, 6, 2, 2, 1, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0};
-            nombre_agents_necessaires = 7;
-        }
-        //3
-        else if(Arrays.equals(plans.getFirst().tailleLotissements, new int[] {4, 4})){
-            choix_barriere_optimale = new int[] {206, 106, 6, 110, 0};
-            valorisations_lotissement_optimales = new int[] {6, 6, 6, 6, 4, 4, 4, 4, 1, 2, 2, 3, 3, 3, 5, 5, 5, 5, 0};
+        //Plan le plus interressant
+        if(Arrays.equals(plans.getLast().tailleLotissements, new int[] {1, 1, 1, 4})){
+            choix_barriere_optimale = new int[] {206, 106, 6, 110, 109, 108, 107, 0};
+            valorisations_lotissement_optimales = new int[] {1, 6, 6, 6, 6, 4, 4, 4, 4, 2, 2, 3, 3, 3, 5, 5, 5, 5, 0};
             nombre_agents_necessaires = 9;
         }
         //DEFAULT
         else{
             choix_barriere_optimale = new int[] {206, 106, 6, 110, 109, 108, 107, 9, 8, 7, 0};
-            valorisations_lotissement_optimales = new int[] {6, 6, 6, 6, 1, 5, 5, 5, 5, 2, 2, 3, 3, 3, 4, 4, 4, 4, 0};
+            valorisations_lotissement_optimales = new int[] {1, 6, 6, 6, 6, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0};
             nombre_agents_necessaires = 5;
         }
 
@@ -326,18 +312,9 @@ public class Strat243 extends Strat{
         return res;
     }
 
-    //TODO Valide toujours les deux premiers plans possibles mais pas le troisieme pour ne pas finir la partie
+    //Valide toujours les plans
     @Override
     public boolean validePlan(Jeu j, int joueur, int plan) {
-        /*
-        if(nombre_plans_valides < 2){
-            nombre_plans_valides++;
-            return true;
-        }
-        else{
-            return false;
-        }
-        */
         return true;
     }
 
@@ -348,7 +325,6 @@ public class Strat243 extends Strat{
         for(int i = 0; i < nombre_parcs.length; i++){nombre_parcs[i] = 0;}
         premier_tour = true;
         nombre_bis = 0;
-        nombre_plans_valides = 0;
     };
 
 
