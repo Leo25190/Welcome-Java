@@ -7,6 +7,7 @@ Lotissements : 4x6 et 9x1
 Score moyen : 95
 
 Copie de strat241 pour implémenter la gestion des objectifs
+voir Jeu.java ligne 669
 ########################################################
  */
 package welcome.ia;
@@ -23,6 +24,7 @@ public class Strat243 extends Strat{
     int nombre_agents;  //Compte le nombre d'agents immobilisers utilisés
     int nombre_barrieres;   //Compte le nombre de barrières placées
     static int nombre_bis; //compte les bis
+    int nombre_plans_valides;   //Compte les plans validés afin de ne pas finir la partie
 
     final static double[][] plateau_ideal = new double[][] {   //Création d'un plateau idéal
             {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
@@ -46,14 +48,21 @@ public class Strat243 extends Strat{
     final static int[] nombre_parcs_max = new int[] {3, 4, 5};  //Le nombre max de parcs par rue
     final static int[] valorisations_lotissement_optimales = new int[] {6, 6, 6, 6, 1, 5, 5, 5, 5, 2, 2, 3, 3, 3, 4, 4, 4, 4, 0}; //L'ordre de valorisation des lotissements, ici d'abord les 6 puis les 1
     final static int nombre_agents_necessaires = 5; //Le nombre d'agents immobiliers nécessaires pour mener à bien la stratégie
-    final static int[] choix_barriere_optimale = new int[] {206, 106, 6, 110, 109, 108, 107, 9, 8, 7, 0}; //Les choix de placement de barrières dans l'ordre, ici pour former des lotissements 4x6 et 9x1
     final static int nombre_bis_max = 3;
+
+    //Gestion des plans
+    ArrayList<Plan> plans = new ArrayList<>();
+    boolean premier_tour;
+    final static int[] choix_barriere_optimale = new int[] {206, 106, 6, 110, 109, 108, 107, 9, 8, 7, 0}; //Les choix de placement de barrières dans l'ordre, ici pour former des lotissements 4x6 et 9x1
+
 
     public Strat243() {
         this.nombre_parcs = new int[3];
         this.nombre_agents = 0;
         this.nombre_barrieres = 0;
         this.nombre_bis = 0;
+        this.nombre_plans_valides = 0;
+        this.premier_tour = true;
 
         this.pioche_choisie = new int[2];
     }
@@ -65,7 +74,7 @@ public class Strat243 extends Strat{
 
     @Override
     public String nomJoueur(){
-        return "JulesLaBulle1";
+        return "JulesLaBulle3";
     }
 
     //Choisit la meilleure pioche
@@ -75,6 +84,12 @@ public class Strat243 extends Strat{
         emplacement_choisi = -1;
         emplacement_gap = -1;
         valeur_interimaire = 0;
+
+        for(int pioche_idx = 0; pioche_idx < j.plans.length && premier_tour; pioche_idx++){    //Au premier tour, on récupère les plans;
+            plans.add(j.plans[pioche_idx]);
+            System.out.println("########################################################## " + plans.getLast());
+        }
+        premier_tour = false;
 
         ArrayList<ArrayList> possibilites_par_pioche = new ArrayList<>();
         ArrayList<Integer> action = new ArrayList<>();
@@ -107,8 +122,7 @@ public class Strat243 extends Strat{
 
             }
         }
-        /*
-         */
+        */
 
         //PISCINES
         for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
@@ -275,9 +289,18 @@ public class Strat243 extends Strat{
         return res;
     }
 
-    //Valide toujours un plan si possible
+    //TODO Valide toujours les deux premiers plans possibles mais pas le troisieme pour ne pas finir la partie
     @Override
     public boolean validePlan(Jeu j, int joueur, int plan) {
+        /*
+        if(nombre_plans_valides < 2){
+            nombre_plans_valides++;
+            return true;
+        }
+        else{
+            return false;
+        }
+        */
         return true;
     }
 
@@ -286,6 +309,9 @@ public class Strat243 extends Strat{
         nombre_agents = 0;
         nombre_barrieres = 0;
         for(int i = 0; i < nombre_parcs.length; i++){nombre_parcs[i] = 0;}
+        premier_tour = true;
+        nombre_bis = 0;
+        nombre_plans_valides = 0;
     };
 
 
