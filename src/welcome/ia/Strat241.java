@@ -17,6 +17,7 @@ import java.util.Collections;
 
 public class Strat241 extends Strat{
     // bot de la mort qui tue
+    final boolean affichage_decisions = false;
     int[] nombre_parcs; //Compte le nombre de parcs par ligne
     int nombre_agents;  //Compte le nombre d'agents immobilisers utilisés
     int nombre_barrieres;   //Compte le nombre de barrières placées
@@ -101,11 +102,12 @@ public class Strat241 extends Strat{
                 emplacement_gap = isGap(j, joueur);
                 nombre_bis++;
 
-                System.out.println("################################## BIS " + emplacement_choisi + " // GAP " + emplacement_gap);
+                if(affichage_decisions)
+                    System.out.println("################################## BIS " + emplacement_choisi + " // GAP " + emplacement_gap);
+
 
             }
         }
-        /*
          */
 
         //PISCINES
@@ -116,7 +118,8 @@ public class Strat241 extends Strat{
 
                 emplacement_choisi = meilleurEmplacementPiscine(numero.get(pioche_idx), possibilites_par_pioche.get(pioche_idx), j, joueur);
 
-                System.out.println("################################## PISCINE " + emplacement_choisi);
+                if(affichage_decisions)
+                    System.out.println("################################## PISCINE " + emplacement_choisi);
             }
         }
 
@@ -129,7 +132,8 @@ public class Strat241 extends Strat{
                 emplacement_choisi = meilleurEmplacementParc(nombre_parcs, possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
                 nombre_parcs[emplacement_choisi/100]++; //On ajoute le parc au compte sur la bonne ligne
 
-                System.out.println("################################## PARC " + emplacement_choisi);
+                if(affichage_decisions)
+                    System.out.println("################################## PARC " + emplacement_choisi);
 
             }
         }
@@ -142,7 +146,8 @@ public class Strat241 extends Strat{
 
                 emplacement_choisi = meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
 
-                System.out.println("################################## BARRIERE " + emplacement_choisi);
+                if(affichage_decisions)
+                    System.out.println("################################## BARRIERE " + emplacement_choisi);
 
             }
         }
@@ -155,7 +160,8 @@ public class Strat241 extends Strat{
 
                 emplacement_choisi = meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
 
-                System.out.println("################################## AGENT " + emplacement_choisi);
+                if(affichage_decisions)
+                    System.out.println("################################## AGENT " + emplacement_choisi);
 
             }
         }
@@ -183,7 +189,8 @@ public class Strat241 extends Strat{
                 emplacement_choisi = max_emplacement;
                 bestPiocheFound = true;
 
-                System.out.println("################################## DEFAULT " + emplacement_choisi);
+                if(affichage_decisions)
+                    System.out.println("################################## DEFAULT " + emplacement_choisi);
             }
 
         }
@@ -197,7 +204,8 @@ public class Strat241 extends Strat{
 
                 emplacement_choisi = meilleurEmplacementInterimaire(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
 
-                System.out.println("################################## INTERIMAIRE " + emplacement_choisi + " // ECART : " + valeur_interimaire + " // NUMERO : " + numero.get(pioche_idx));
+                if(affichage_decisions)
+                    System.out.println("################################## INTERIMAIRE " + emplacement_choisi + " // ECART : " + valeur_interimaire + " // NUMERO : " + numero.get(pioche_idx));
 
             }
         }
@@ -206,7 +214,8 @@ public class Strat241 extends Strat{
         if(res<0 || res>2) {
             res = RandomSingleton.getInstance().nextInt(3);
 
-            System.out.println("################################## RAMDOM " + res);
+            if(affichage_decisions)
+                System.out.println("################################## RAMDOM " + res);
         }
 
         pioche_choisie[0] = ((Travaux)j.numeros[res].top()).getNumero();
@@ -214,7 +223,7 @@ public class Strat241 extends Strat{
 
         return res;
     }
-    
+
     //Place un numéro bis si il y a un trou
     @Override
     public int choixBis(Jeu j, int joueur, ArrayList<Integer> placeValide){
@@ -457,10 +466,8 @@ public class Strat241 extends Strat{
                 int num_pre = j.joueurs[joueur].ville.rues[rue_idx].maisons[i-1].numero; //numéro maison précédente
                 int num_post = j.joueurs[joueur].ville.rues[rue_idx].maisons[i+1].numero; //numéro maison suivante
                 int num_act = j.joueurs[joueur].ville.rues[rue_idx].maisons[i].numero; //numéro maison actuelle
-                if(num_act == -1 && num_pre != -1 && num_post != -1){ //Si les deux maisons adjacentes sont occupées, que la maison est dispo
-                    System.out.println("################################################################# " + num_pre + " // " + num_act + " // " + num_post + " // NBR " + nombre_bis);
+                if(num_act == -1 && num_pre != -1 && num_post != -1) //Si les deux maisons adjacentes sont occupées, que la maison est dispo
                     return 100*rue_idx + i;
-                }
             }
         }
         return -1;
