@@ -15,7 +15,7 @@ public class TousEnsemble extends Tournoi{
     @Override
     public int[][] run() {
         int[][] score=new int[this.participants.length][2];
-        int[][] tousLesScores = new int[this.participants.length][nbPartie];
+        double[][] tousLesScores = new double[this.participants.length][nbPartie];
 
         int[] scorePartie;
         int place;
@@ -71,7 +71,7 @@ public class TousEnsemble extends Tournoi{
             System.out.println("MEDIANE : " + mediane(tousLesScores[i]));
             System.out.println("PREMIER QUARTILE : " + premierQuartile(tousLesScores[i]));
             System.out.println("TROISIEME QUARTILE : " + troisiemeQuartile(tousLesScores[i]));
-            System.out.println("ECART-TYPE : " + (int)Math.sqrt(variance(tousLesScores[i])));
+            System.out.println("ECART-TYPE : " + Math.sqrt(variance(tousLesScores[i])));
         }
         return score;
     }
@@ -79,8 +79,8 @@ public class TousEnsemble extends Tournoi{
     // Méthodes de calcul des statistiques
 
     // Méthode pour calculer le minimum d'un tableau d'entiers
-    public static int minimum(int[] tableau) {
-        int min = tableau[0];
+    public static double minimum(double[] tableau) {
+        double min = tableau[0];
         for (int i = 1; i < tableau.length; i++) {
             if (tableau[i] < min) {
                 min = tableau[i];
@@ -90,8 +90,8 @@ public class TousEnsemble extends Tournoi{
     }
 
     // Méthode pour calculer le maximum d'un tableau d'entiers
-    public static int maximum(int[] tableau) {
-        int max = tableau[0];
+    public static double maximum(double[] tableau) {
+        double max = tableau[0];
         for (int i = 1; i < tableau.length; i++) {
             if (tableau[i] > max) {
                 max = tableau[i];
@@ -101,7 +101,7 @@ public class TousEnsemble extends Tournoi{
     }
 
     // Méthode pour calculer la médiane d'un tableau d'entiers
-    public static double mediane(int[] tableau) {
+    public static double mediane(double[] tableau) {
         Arrays.sort(tableau);
         int n = tableau.length;
         if (n % 2 == 0) {
@@ -112,7 +112,7 @@ public class TousEnsemble extends Tournoi{
     }
 
     // Méthode pour calculer le premier quartile d'un tableau d'entiers
-    public static double premierQuartile(int[] tableau) {
+    public static double premierQuartile(double[] tableau) {
         Arrays.sort(tableau);
         int n = tableau.length;
         if (n % 4 == 0) {
@@ -123,7 +123,7 @@ public class TousEnsemble extends Tournoi{
     }
 
     // Méthode pour calculer le troisième quartile d'un tableau d'entiers
-    public static double troisiemeQuartile(int[] tableau) {
+    public static double troisiemeQuartile(double[] tableau) {
         Arrays.sort(tableau);
         int n = tableau.length;
         if (n % 4 == 0) {
@@ -134,10 +134,10 @@ public class TousEnsemble extends Tournoi{
     }
 
     // Méthode pour calculer la variance d'un tableau d'entiers
-    public static double variance(int[] tableau) {
+    public static double variance(double[] tableau) {
         double moyenne = Arrays.stream(tableau).average().orElse(Double.NaN);
         double sommeCarres = 0;
-        for (int valeur : tableau) {
+        for (double valeur : tableau) {
             sommeCarres += Math.pow(valeur - moyenne, 2);
         }
         return sommeCarres / tableau.length;
