@@ -21,7 +21,7 @@ import java.util.Collections;
 
 public class Strat243 extends Strat{
     // bot de la mort qui tue
-    final boolean affichage_decisions = false;
+    final boolean affichage_decisions = true;
     int[] nombre_parcs; //Compte le nombre de parcs par ligne
     int nombre_agents;  //Compte le nombre d'agents immobilisers utilisés
     int nombre_barrieres;   //Compte le nombre de barrières placées
@@ -88,7 +88,7 @@ public class Strat243 extends Strat{
         for(int pioche_idx = 0; pioche_idx < j.plans.length && premier_tour; pioche_idx++){    //Au premier tour, on récupère les plans;
             plans.add(j.plans[pioche_idx]);
             if(affichage_decisions)
-                System.out.println("########################################################## " + plans.getLast());
+                System.out.println("\n#################################################################### " + plans.getLast());
         }
         premier_tour = false;
 
@@ -121,10 +121,8 @@ public class Strat243 extends Strat{
         //On parcourt les pioches pour chaque carte action qui nous interresse selon l'ordre de priorité suivant
         boolean bestPiocheFound = false;
 
-        //BIS TODO -> Ne fonctionne pas bien, fait perdre 3pts
-        /*
         //BIS POUR COMBLER LES GAPS
-        for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
+        for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound && remplissagePlateau(j, joueur) > 0.6; pioche_idx++){   //On cherche à combler les trous seulement si le plateau est déja bien rempli TODO
             if(action.get(pioche_idx) == 3 &&  isGap(j, joueur)>= 0 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur)>=0 && nombre_bis <= nombre_bis_max){
                 res = pioche_idx;
                 bestPiocheFound = true;
@@ -138,7 +136,7 @@ public class Strat243 extends Strat{
 
             }
         }
-        */
+
 
         //PISCINES
         for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
@@ -360,7 +358,6 @@ public class Strat243 extends Strat{
         }
 
         // Autres rues
-        boolean found = false;
         for (int i = 1; i >= 0; i--) { // Parcours les deux premières rues
             if(!isFull(j.joueurs[joueur].ville.rues[i])){   //Si la rue n'est pas pleine
                 for (int k = 0; k < emplacement_piscine_optimale[i].length; k++) { // Parcours les emplacements de piscine optimaux pour chaque rue
@@ -368,7 +365,6 @@ public class Strat243 extends Strat{
                     int numeroPiscine = numero_piscine_optimale[i][k];
                     if (numero == numeroPiscine && j.joueurs[joueur].ville.rues[i].maisons[emplacement].numero == -1) {
                         if(placeValide.contains(100 * i + emplacement)) {
-                            found = true;
                             return 100 * i + emplacement; // Retourne l'emplacement optimal si la maison est disponible et le numéro correspond
                         }
                     }
@@ -388,14 +384,12 @@ public class Strat243 extends Strat{
         }
 
         //Autres rues
-        boolean found = false;
         for(int i = 1; i >= 0; i--){ //Parcours les deux rues
             if(!isFull(j.joueurs[joueur].ville.rues[i])){   //Si la rue n'est pas pleine
-                for(int k = 0; k < plateau_ideal[i].length && !found; k++){
+                for(int k = 0; k < plateau_ideal[i].length; k++){
                     int numeroParc = (int)plateau_ideal[i][k];
                     if(numeroParc == numero && j.joueurs[joueur].ville.rues[i].maisons[k].numero == -1 && nombre_parcs[i] < nombre_parcs_max[i]){ //Si le numero correspond au plateau ideal, que l'emplacement est dispo et qu'il manque encore un parc
                         if(placeValide.contains(100 * i + k)) {
-                            found = true;
                             return 100 * i + k;
                         }
                     }
@@ -446,13 +440,12 @@ public class Strat243 extends Strat{
         }
 
         // Autres rues
-        boolean found = false;
+
         for(int i = 1; i >= 0; i--) {
-            for(int k = 0; k < plateau_ideal[i].length && !found; k++) {
+            for(int k = 0; k < plateau_ideal[i].length; k++) {
                 int numeroIdeal = (int)plateau_ideal[i][k];
                 if(numeroIdeal == numero && j.joueurs[joueur].ville.rues[i].maisons[k].numero == -1) {
                     if(placeValide.contains(100 * i + k)) {
-                        found = true;
                         return 100 * i + k;
                     }
                 }
@@ -504,5 +497,18 @@ public class Strat243 extends Strat{
             }
         }
         return -1;
+    }
+
+    //Donne le remplissage du plateau entre 0 et 1
+    public static double remplissagePlateau(Jeu j, int joueur){
+        int nombre_places_vides = 0;
+        final int nombre_places_total = 33;
+        for(int rue_idx = 0; rue_idx < 3; rue_idx++){
+            for(int maison_idx = 0; maison_idx < plateau_ideal[rue_idx].length; maison_idx++){
+                if(j.joueurs[joueur].ville.rues[rue_idx].maisons[maison_idx].numero == -1)
+                    nombre_places_vides++;
+            }
+        }
+        return (double)(nombre_places_vides / nombre_places_total);
     }
 }
