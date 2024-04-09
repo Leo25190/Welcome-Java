@@ -48,6 +48,7 @@ public class Strat241 extends Strat{
     final static int[] choix_barriere_optimale = new int[] {206, 106, 6, 110, 109, 108, 107, 9, 8, 7, 0}; //Les choix de placement de barrières dans l'ordre, ici pour former des lotissements 4x6 et 9x1
     final static int nombre_bis_max = 3;
 
+
     public Strat241() {
         this.nombre_parcs = new int[3];
         this.nombre_agents = 0;
