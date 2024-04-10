@@ -18,42 +18,42 @@ import java.util.Collections;
 
 public class Strat243 extends Strat{
     // bot de la mort qui tue
-    final boolean affichage_decisions = false;
-    int[] nombre_parcs; //Compte le nombre de parcs par ligne
-    int nombre_agents;  //Compte le nombre d'agents immobilisers utilisés
-    int nombre_barrieres;   //Compte le nombre de barrières placées
-    static int nombre_bis; //compte les bis
+    private final boolean affichage_decisions = false;
+    private int[] nombre_parcs; //Compte le nombre de parcs par ligne
+    private int nombre_agents;  //Compte le nombre d'agents immobilisers utilisés
+    private int nombre_barrieres;   //Compte le nombre de barrières placées
+    private static int nombre_bis; //compte les bis
 
-    final static double[][] plateau_ideal = new double[][] {   //Création d'un plateau idéal
+    private final static double[][] plateau_ideal = new double[][] {   //Création d'un plateau idéal
             {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
             {5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
             {3.4, 4.4, 5.4, 6.4, 7.4, 8.4, 8.6, 9.6, 10.6, 11.6, 12.6, 13.6}
     };
-    final static double max_ecart = 2.5;  //Pour les fonctions de recherche de minimum pour la dernière rue
-    int emplacement_choisi; //Emplacement préférable
-    int emplacement_gap;    //Emplacement d'un trou entre deux nombres si on en trouve un
-    static int valeur_interimaire; //Valeur ajoutée au numéro dans le cas d'un intérimaire
+    private final static double max_ecart = 2.5;  //Pour les fonctions de recherche de minimum pour la dernière rue
+    private int emplacement_choisi; //Emplacement préférable
+    private int emplacement_gap;    //Emplacement d'un trou entre deux nombres si on en trouve un
+    private static int valeur_interimaire; //Valeur ajoutée au numéro dans le cas d'un intérimaire
 
-    final static int[][] emplacement_piscine_optimale = new int[][] {   //Les emplacements ou on veut placer des piscines sur les deux premières rues
+    private final static int[][] emplacement_piscine_optimale = new int[][] {   //Les emplacements ou on veut placer des piscines sur les deux premières rues
             {2, 6, 7},
             {0, 3, 7}
     };
-    final static int[][] numero_piscine_optimale = new int[][] {    //Les numéros qu'on veut pour les piscines sur les deux premières rues (correspondantes à l'emplacement optimal)
+    private final static int[][] numero_piscine_optimale = new int[][] {    //Les numéros qu'on veut pour les piscines sur les deux premières rues (correspondantes à l'emplacement optimal)
             {3, 7, 8},
             {5, 8, 12}
     };
-    final static int[] nombre_parcs_max = new int[] {3, 4, 5};  //Le nombre max de parcs par rue
-    static int[] valorisations_lotissement_optimales; //L'ordre de valorisation des lotissements, ici d'abord les 6 puis les 1
-    static int nombre_agents_necessaires; //Le nombre d'agents immobiliers nécessaires pour mener à bien la stratégie
+    private final static int[] nombre_parcs_max = new int[] {3, 4, 5};  //Le nombre max de parcs par rue
+    private static int[] valorisations_lotissement_optimales; //L'ordre de valorisation des lotissements, ici d'abord les 6 puis les 1
+    private static int nombre_agents_necessaires; //Le nombre d'agents immobiliers nécessaires pour mener à bien la stratégie
 
     //Variables pour les bis, non utilisées car n'améliore pas le score
-    final static int nombre_bis_max = 3;
-    final static double taux_remplissage_min_pour_bis = 0.95;
+    private final static int nombre_bis_max = 3;
+    private final static double taux_remplissage_min_pour_bis = 0.95;
 
     //Gestion des plans
-    ArrayList<Plan> plans = new ArrayList<>();
-    boolean premier_tour;
-    static int[] choix_barriere_optimale; //Les choix de placement de barrières dans l'ordre, pour former des lotissements en fonction des plans
+    private ArrayList<Plan> plans = new ArrayList<>();
+    private boolean premier_tour;
+    private static int[] choix_barriere_optimale; //Les choix de placement de barrières dans l'ordre, pour former des lotissements en fonction des plans
 
 
     public Strat243() {
@@ -350,7 +350,7 @@ public class Strat243 extends Strat{
     }
 
     //Trouve le meilleur emplacement de piscine -> ce n'est pas la priorité, mais si ca tombe bien, on prend
-    public static int meilleurEmplacementPiscine(int numero, ArrayList<Integer> placeValide, Jeu j, int joueur) {
+    private static int meilleurEmplacementPiscine(int numero, ArrayList<Integer> placeValide, Jeu j, int joueur) {
         // Test rue 2
         int idx = findClosestIndexAvailable(numero, plateau_ideal[2], j, joueur);
         if (idx != -1 && Math.abs(numero - plateau_ideal[2][idx]) <= max_ecart && j.joueurs[joueur].ville.rues[2].maisons[idx].emplacementPiscine) {    //Si on trouve un indice, que l'écart est inférieur à 1, et qu'il y a un emplacement piscine
@@ -376,7 +376,7 @@ public class Strat243 extends Strat{
     }
 
     //Trouve le meilleur emplacement de parcs en fonction du nombre de parcs posés par rue
-    public static int meilleurEmplacementParc(int[] nombre_parcs, ArrayList<Integer> placeValide, int numero, Jeu j, int joueur){
+    private static int meilleurEmplacementParc(int[] nombre_parcs, ArrayList<Integer> placeValide, int numero, Jeu j, int joueur){
         //Rue 2
         int idx = findClosestIndexAvailable(numero, plateau_ideal[2], j, joueur);
         if(idx != -1 && Math.abs(numero - plateau_ideal[2][idx]) <= max_ecart && nombre_parcs[2] < nombre_parcs_max[2]){ //Si il n'y a pas encore 5 parcs et qu'on trouve un index
@@ -401,7 +401,7 @@ public class Strat243 extends Strat{
     }
 
     //Cherche un emplacement pour toutes les valeurs possibles de la carte intérimaire
-    public static int meilleurEmplacementInterimaire(int numero, Jeu j, int joueur){
+    private static int meilleurEmplacementInterimaire(int numero, Jeu j, int joueur){
         ArrayList<Integer> emplacements_trouves = new ArrayList<>();
         ArrayList<Integer> ecarts_necessaires = new ArrayList<>();
         ArrayList<ArrayList<Integer>> placesValides = new ArrayList<>();
@@ -435,7 +435,7 @@ public class Strat243 extends Strat{
     }
 
     //Trouve le meilleur emplacement pour un numéro
-    public static int meilleurEmplacementDefault(ArrayList<Integer> placeValide, int numero, Jeu j, int joueur){
+    private static int meilleurEmplacementDefault(ArrayList<Integer> placeValide, int numero, Jeu j, int joueur){
         // Rue 2
         int idxRue2 = findClosestIndexAvailable(numero, plateau_ideal[2], j, joueur);
         if(idxRue2 != -1 && Math.abs(numero - plateau_ideal[2][idxRue2]) <= max_ecart) {
@@ -460,7 +460,7 @@ public class Strat243 extends Strat{
     }
 
     //Cherche l'indice dans la rue 2 qui minimise l'écart entre le numero donné et le plateau ideal
-    public static int findClosestIndexAvailable(int numero, double[] rue, Jeu j, int joueur) {
+    private static int findClosestIndexAvailable(int numero, double[] rue, Jeu j, int joueur) {
         int idx = -1;
         if (!isFull(j.joueurs[joueur].ville.rues[2])) {
             double min = Double.MAX_VALUE; // Initialiser min avec une valeur grande
@@ -478,7 +478,7 @@ public class Strat243 extends Strat{
     }
 
     //Check si une rue est pleine
-    public static boolean isFull(Rue rue){ //indique si une rue est pleine
+    private static boolean isFull(Rue rue){ //indique si une rue est pleine
         boolean full = true;
         for(int i = 0; i < rue.taille; i++){
             if(rue.maisons[i].estVide()){
@@ -490,7 +490,7 @@ public class Strat243 extends Strat{
     }
 
     //Cherche un trou entre deux nombres
-    public static int isGap(Jeu j, int joueur){
+    private static int isGap(Jeu j, int joueur){
         for(int rue_idx = 2; rue_idx >= 0; rue_idx--){
             for(int i = 1; i < j.joueurs[joueur].ville.rues[rue_idx].taille-1; i++){
                 int num_pre = j.joueurs[joueur].ville.rues[rue_idx].maisons[i-1].numero; //numéro maison précédente
@@ -511,7 +511,7 @@ public class Strat243 extends Strat{
     }
 
     //Donne le taux de remplissage du plateau entre 0 et 1
-    public static double remplissagePlateau(Jeu j, int joueur) {
+    private static double remplissagePlateau(Jeu j, int joueur) {
         int nombre_places_vides = 0;
         final int nombre_places_total = 33;
         for (int rue_idx = 0; rue_idx < 3; rue_idx++) {
