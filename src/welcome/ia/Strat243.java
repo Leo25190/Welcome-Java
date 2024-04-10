@@ -3,7 +3,7 @@
 -------------------STRATEGIE 243------------------------
 
 Cette stratégie se base sur un plateau ideal, et cherche à placer les numéros en respectant ce plan.
-Lotissements : 4x6 et 9x1
+Lotissements : 4x6, 1x4 et 5x1 si on trouve l'objectif {1, 1, 1, 4}, 4x6 et 9x1 par défaut
 Score moyen : 103
 ########################################################
  */
