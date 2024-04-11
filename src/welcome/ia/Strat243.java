@@ -4,7 +4,7 @@
 
 Cette stratégie se base sur un plateau ideal, et cherche à placer les numéros en respectant ce plan.
 Lotissements : 4x6, 1x4 et 5x1 si on trouve l'objectif {1, 1, 1, 4}, 4x6 et 9x1 par défaut
-Score moyen : 103
+Score moyen : 103.5
 ########################################################
  */
 package welcome.ia;
@@ -82,8 +82,9 @@ public class Strat243 extends Strat{
         emplacement_gap = -1;
         valeur_interimaire = 0;
 
+        //Au premier tour, on récupère les plans;
         if(premier_tour){
-            for(int pioche_idx = 0; pioche_idx < j.plans.length; pioche_idx++){    //Au premier tour, on récupère les plans;
+            for(int pioche_idx = 0; pioche_idx < j.plans.length; pioche_idx++){
                 plans.add(j.plans[pioche_idx]);
                 if(affichage_decisions)
                     System.out.println("#################################################################### " + plans.getLast());
