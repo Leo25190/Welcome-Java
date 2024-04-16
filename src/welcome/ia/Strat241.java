@@ -18,7 +18,7 @@ import java.util.Collections;
 
 public class Strat241 extends Strat{
     // bot de la mort qui tue
-    private final boolean affichage_decisions = false;
+    private final boolean affichage_decisions = false;  //Active l'affichage des décisions de l'algo
     private int[] nombre_parcs; //Compte le nombre de parcs par ligne
     private int nombre_agents;  //Compte le nombre d'agents immobilisers utilisés
     private int nombre_barrieres;   //Compte le nombre de barrières placées
