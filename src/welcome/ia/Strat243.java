@@ -259,7 +259,7 @@ public class Strat243 extends Strat{
     public int choixBis(Jeu j, int joueur, ArrayList<Integer> placeValide){
         int res=0;
 
-        if(emplacement_gap != -1) {     //Emplacement déjà choisi
+        if(emplacement_gap != -1) {     //Emplacement déjà choisi - Non utilisé
             res = placeValide.indexOf(emplacement_gap);
             emplacement_gap = -1;
         }
@@ -300,7 +300,7 @@ public class Strat243 extends Strat{
         return res;
     }
 
-    //Forme des lotissements : 4x6 et 9x1
+    //Forme des lotissements en fonction des objectifs
     @Override
     public int choixBarriere(Jeu j, int joueur,  ArrayList<Integer> placeValide){
         int res = placeValide.indexOf(choix_barriere_optimale[nombre_barrieres]);
