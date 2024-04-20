@@ -16,15 +16,18 @@ public class Strat88 extends Strat{
     private int indexActuelLotissements = 0;
     private int numeroInterim = 0;
     private final double[][] basePositions = {
-            {1.5, 3.5, 5.1, 6.2, 7, 8.44, 9.46, 10.59, 12.09, 14.5},
+            /*{1.5, 3.5, 5.1, 6.2, 7, 8.44, 9.46, 10.59, 12.09, 14.5},
             {1.78, 3.65, 4.8, 6, 6.8, 8., 8.86, 9.78, 10.86, 12.35, 14.22},
+            {1, 2.5, 3.8, 5.2, 6, 7, 8, 9, 10, 11.5, 13, 15}*/
+            {1, 2, 3, 6.2, 7, 8.44, 9.46, 10.59, 12.09, 14.5},
+            {5.2, 6.5, 7.4, 8.2, 9, 9.8, 10.8, 12, 13, 14, 15},
             {1, 2.5, 3.8, 5.2, 6, 7, 8, 9, 10, 11.5, 13, 15}
     };
     private final double[] ecartParametre = {3, 1, 2};
     private final double[] probabilites = {9./81, 8./81, 7./81, 6./81, 5./81, 4./81, 3./81, 3./81, 3./81, 4./81, 5./81, 6./81, 7./81, 8./81, 9./81};
     private final int[] emplacementsPiscines = {2, 6, 7, 103, 107, 201, 206, 210};
-    private final int[] emplacementsBarrieres = {206, 106, 6, 110, 109, 108, 107, 0};
-    private final int[] upgradesLotissements = {1, 6, 6, 6, 6, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0};
+    private final int[] emplacementsBarrieres = {206, 106, 6, 110, 109, 108, 107, 8, 7, 9};
+    private final int[] upgradesLotissements = {1, 6, 6, 6, 6, 2, 2};
 
     public Strat88(){
     }
@@ -51,9 +54,7 @@ public class Strat88 extends Strat{
     public int choixNumero(Jeu j, int joueur, int numero) {
         if (numeroInterim > Math.min(numero + 2, 17) || numeroInterim < Math.max(numero - 2, 0)) {
             numeroInterim = numero;
-            System.out.println("Ne remplissait pas les conditions");
         }
-        System.out.println("Numero : " + numero + "\nInterim : " + numeroInterim);
         return numeroInterim;
     }
 
@@ -167,7 +168,7 @@ public class Strat88 extends Strat{
             int emplacementIndex = getEmplacementMaison(numeros[i], placesValides);
 
             if (emplacementIndex >= 0) {
-                poids[i] += 81 * (probabilites[numeros[i] - 1]);
+                poids[i] += 65 * (probabilites[numeros[i] - 1]);
                 switch(actions[i]) {
                     case 0:
                         if (contains(emplacementsPiscines, placesValides.get(emplacementIndex))){
@@ -180,17 +181,15 @@ public class Strat88 extends Strat{
                         }
                         break;
                     case 4:
-                        poids[i] += 5;
+                        poids[i] += 6;
                         break;
                     case 1:
                         numeroInterim = numeros[i];
-
                         for (int j = -2 ; j <= 2 ; j++) {
-
                             if (numeros[i] + j >= 0) {
                                 ArrayList<Integer> placesValidesInterim = construirePossibilite(numeros[i] + j, jeu.joueurs[joueur]);
                                 int emplacementInterim = getEmplacementMaison(numeros[i] + j, placesValidesInterim);
-                                double poidsActuel = 81 * probabilites[Math.max(0, Math.min(numeros[i] + j - 1, 14))];
+                                double poidsActuel = 65 * probabilites[Math.max(0, Math.min(numeros[i] + j - 1, 14))];
                                 if (emplacementInterim >= 0 && poidsActuel > poids[i]) {
                                     poids[i] = poidsActuel;
                                     numeroInterim = numeros[i] + j;
@@ -199,7 +198,8 @@ public class Strat88 extends Strat{
                         }
                         break;
                     case 5:
-                        poids[i] += 7;
+                        poids[i] += 8;
+                        break;
                 }
             }
         }
@@ -215,20 +215,16 @@ public class Strat88 extends Strat{
 
 
     //Méthodes pour aider à faire les choix
-    public ArrayList<Integer> construirePossibilite(int numero, Joueur joueur){
-        int min; // Variable utiles
-        ArrayList<Integer> possibilite= new ArrayList<>();
-
-        for(int i=0; i<3; i++){//Pour chaque rue
-            min=joueur.ville.rues[i].taille-1; //on part de la fin
-
-            while(min>=0  && (joueur.ville.rues[i].maisons[min].numero==-1 || joueur.ville.rues[i].maisons[min].numero > numero))
-                min--; // on décrement le min tant qu'on a pas trouvé un numéro <=
-
-            if(min<0 || joueur.ville.rues[i].maisons[min].numero!=numero){
-                min++;// On part de la case suivante
-                while(min < joueur.ville.rues[i].taille && joueur.ville.rues[i].maisons[min].numero == -1){
-                    possibilite.add((Integer)(min+ 100*i)); // on construit les possibilités tant qu'on a des cases vides
+    public ArrayList<Integer> construirePossibilite(int numero, Joueur joueur) {
+        ArrayList<Integer> possibilite = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            int min = joueur.ville.rues[i].taille - 1;
+            while (min >= 0 && (joueur.ville.rues[i].maisons[min].numero == -1 || joueur.ville.rues[i].maisons[min].numero > numero))
+                min--;
+            if (min < 0 || joueur.ville.rues[i].maisons[min].numero != numero) {
+                min++;
+                while (min < joueur.ville.rues[i].taille && joueur.ville.rues[i].maisons[min].numero == -1) {
+                    possibilite.add(min + 100 * i);
                     min++;
                 }
             }
