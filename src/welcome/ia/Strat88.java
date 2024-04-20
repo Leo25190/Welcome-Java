@@ -8,27 +8,23 @@ import java.util.Collection;
 import java.util.Collections;
 
 public class Strat88 extends Strat{
-    /*private final double[][] basePositions = {
-        {6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
-        {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
-        {1.67, 3.52, 4.78, 5.89, 6.85, 7.67, 8.33, 9.15, 10.11, 11.22, 12.48, 14.33}
-    };*/
-    private final double[][] basePositions = {
-            {1.5, 3.5, 5.1, 6.2, 7, 8.44, 9.46, 10.59, 12.09, 14.11},
-            {1.78, 3.65, 4.8, 6, 6.8, 8., 8.86, 9.78, 10.86, 12.35, 14.22},
-            {1.67, 3, 4.2, 4.8, 6.2, 7, 8, 9.15, 10.11, 11.22, 12.48, 14.33}
-    };
+
     private int tour = 0;
     private int emplacementMaisonIndex = 0;
     private int indexNumero = 0;
     private int indexActuelBarrieres = 0;
     private int indexActuelLotissements = 0;
     private int numeroInterim = 0;
+    private final double[][] basePositions = {
+            {1.5, 3.5, 5.1, 6.2, 7, 8.44, 9.46, 10.59, 12.09, 14.5},
+            {1.78, 3.65, 4.8, 6, 6.8, 8., 8.86, 9.78, 10.86, 12.35, 14.22},
+            {1, 2.5, 3.8, 5.2, 6, 7, 8, 9, 10, 11.5, 13, 15}
+    };
     private final double[] ecartParametre = {3, 1, 2};
     private final double[] probabilites = {9./81, 8./81, 7./81, 6./81, 5./81, 4./81, 3./81, 3./81, 3./81, 4./81, 5./81, 6./81, 7./81, 8./81, 9./81};
     private final int[] emplacementsPiscines = {2, 6, 7, 103, 107, 201, 206, 210};
-    private final int[] emplacementsBarrieres = {206, 106, 6, 7, 8, 9};
-    private final int[] upgradesLotissements = {6, 6, 6, 6, 1};
+    private final int[] emplacementsBarrieres = {206, 106, 6, 110, 109, 108, 107, 0};
+    private final int[] upgradesLotissements = {1, 6, 6, 6, 6, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0};
 
     public Strat88(){
     }
@@ -53,6 +49,11 @@ public class Strat88 extends Strat{
 
     @Override
     public int choixNumero(Jeu j, int joueur, int numero) {
+        if (numeroInterim > Math.min(numero + 2, 17) || numeroInterim < Math.max(numero - 2, 0)) {
+            numeroInterim = numero;
+            System.out.println("Ne remplissait pas les conditions");
+        }
+        System.out.println("Numero : " + numero + "\nInterim : " + numeroInterim);
         return numeroInterim;
     }
 
@@ -80,7 +81,8 @@ public class Strat88 extends Strat{
     public int choixBarriere(Jeu j, int joueur, ArrayList<Integer> placeValide) {
         if (indexActuelBarrieres < emplacementsBarrieres.length) {
             indexActuelBarrieres++;
-            return placeValide.indexOf(emplacementsBarrieres[indexActuelBarrieres - 1]);
+            int index = placeValide.indexOf(emplacementsBarrieres[indexActuelBarrieres - 1]);
+            return index == - 1 ? 0 : index;
         }
         return 1;
     }
@@ -92,14 +94,19 @@ public class Strat88 extends Strat{
 
     @Override
     public void resetStrat(){
-
+        tour = 0;
+        emplacementMaisonIndex = 0;
+        indexNumero = 0;
+        indexActuelBarrieres = 0;
+        indexActuelLotissements = 0;
+        numeroInterim = 0;
     }
 
     //Méthodes pour les choix
 
     //Méthode qui cherche l'index idéal dans placesValide
     public int getEmplacementMaison(int numero, ArrayList<Integer> placesValides) {
-        if (placesValides.size() == 0 || placesValides == null) {
+        if (placesValides.isEmpty()) {
             return -1;
         }
 
@@ -135,21 +142,17 @@ public class Strat88 extends Strat{
             }
         }*/
 
-        double ecart = Math.abs(basePositions[placesValides.get(0) / 100][placesValides.get(0) % 100] - numero);
-        int indexEcartMin = 0;
-        for (int i = 1 ; i < placesValides.size() ; i++) {
+        double ecart = Math.abs(basePositions[placesValides.getLast() / 100][placesValides.getLast() % 100] - numero);
+        int indexEcartMin = placesValides.size() - 1;
+        for (int i = placesValides.size() - 2 ; i >= 0 ; i--) {
 
             double tempEcart = Math.abs(basePositions[placesValides.get(i) / 100][placesValides.get(i) % 100] - numero);
-            if (tour < 15 && contains(emplacementsPiscines, placesValides.get(i))) {
-                tempEcart = 100;
-            }
             if (tempEcart < ecart) {
                 ecart = tempEcart;
                 indexEcartMin = i;
             }
         }
         return indexEcartMin;
-        //return index;
     }
 
     public int indexChoixNumero(Jeu jeu, int joueur) {
@@ -177,43 +180,29 @@ public class Strat88 extends Strat{
                         }
                         break;
                     case 4:
-                        poids[i] += 3;
+                        poids[i] += 5;
                         break;
                     case 1:
-                        for (int j = -2 ; j < 3 ; j++) {
+                        numeroInterim = numeros[i];
 
-                            //Création de la liste des possibilités considérées pour l'interimaire
-                            ArrayList<Integer> placesValidesInterim = construirePossibilite(numeros[i] + j, jeu.joueurs[joueur]);
-                            //Recherche du meilleur emplacement pour le numéro modifié choisi
-                            int emplacementIndexInterim = getEmplacementMaison(numeros[i] + j, placesValidesInterim);
-                            double poidsInterim = 0;
+                        for (int j = -2 ; j <= 2 ; j++) {
 
-                            //Recherche de la probabilité de pouvoir placer le numéro choisi
-                            int indexProbabilite = numeros[i] + j - 1;
-                            if (indexProbabilite < 0) {
-                                indexProbabilite = 0;
-                            } else if (indexProbabilite >= probabilites.length) {
-                                indexProbabilite = probabilites.length - 1;
-                            }
-
-                            //On regarde si un emplacement idéal a été trouvé pour l'interimaire
-                            if (emplacementIndexInterim >= 0) {
-                                poidsInterim = 81 * (probabilites[indexProbabilite]);
-                            }
-
-                            if (poidsInterim > poids[i]) {
-                                poids[i] = 81 * (probabilites[indexProbabilite]);
-                                numeroInterim = numeros[i] + j;
-                                System.out.println("Numero interim: " + numeroInterim);
-                            } else if (placesValidesInterim.size() > 0) {
-                                numeroInterim = numeros[i] + j;
-                                poids[i] = 81 * (probabilites[indexProbabilite]);
+                            if (numeros[i] + j >= 0) {
+                                ArrayList<Integer> placesValidesInterim = construirePossibilite(numeros[i] + j, jeu.joueurs[joueur]);
+                                int emplacementInterim = getEmplacementMaison(numeros[i] + j, placesValidesInterim);
+                                double poidsActuel = 81 * probabilites[Math.max(0, Math.min(numeros[i] + j - 1, 14))];
+                                if (emplacementInterim >= 0 && poidsActuel > poids[i]) {
+                                    poids[i] = poidsActuel;
+                                    numeroInterim = numeros[i] + j;
+                                }
                             }
                         }
+                        break;
+                    case 5:
+                        poids[i] += 7;
                 }
             }
         }
-        System.out.println("\n\nPoids : " + Arrays.toString(poids) + "\n");
         //On cherche l'index du numéro le plus grand
         int maxIndex = 0;
         for (int i = 1 ; i < 3 ; i++) {
@@ -245,16 +234,6 @@ public class Strat88 extends Strat{
             }
         }
         return possibilite;
-    }
-
-    public static ArrayList<Integer> getPossibilitesByRue(ArrayList<Integer> possibilites, int rue){
-        ArrayList<Integer> possibilitesByRue = new ArrayList<>();
-        for (int i = 0; i < possibilites.size(); i++) {
-            if (possibilites.get(i) / 100 == rue) {
-                possibilitesByRue.add(possibilites.get(i));
-            }
-        }
-        return possibilitesByRue;
     }
 
     public static boolean contains(int[] liste, int valeur) {
