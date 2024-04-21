@@ -11,7 +11,7 @@ public class Main {
         Scanner s = new Scanner(System.in);
         //Mode 1 : plein de parties - Mode 2 : détail de la partie
         System.out.println("CHOIX DU TYPE DE TEST\nMode 1 : plein de parties - Mode 2 : détail de la partie");
-        lancerMode(1);
+        lancerMode(2);
         s.close();
     }
 
@@ -19,17 +19,26 @@ public class Main {
         switch(choix){
             case 1: exempleLanceIA(); break;
             case 2: exempleLanceJeuHumain(); break;
+            case 3: championnat(); break;
             default: System.out.println("Choix invalide");
         }
     }
-    
+
+    public static void championnat() {   //TEST 1
+        try{
+            Championnat1v1 c = new Championnat1v1(new int[] {241, 88}, 10000);
+            c.run();
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
     public static void exempleLanceIA() {   //TEST 1
         try{
             TousEnsemble t = new TousEnsemble(new int[] {241, 88}, 10000);
-            Championnat1v1 c = new Championnat1v1(new int[] {241, 88}, 10000);
             t.run();
-            //c.run();
-        }        
+        }
         catch(Exception e){
             e.printStackTrace();
         }
@@ -40,7 +49,7 @@ public class Main {
         Joueur j0= new Bot(new Strat88(), "Leo", "Loos en gohelle");
         Joueur j1= new Bot(new Strat241(), "Jules241", "Los Angeles");
         Joueur j2= new Bot(new Strat243(), "Jules243", "Los Angeles");
-        Joueur[] joueurs = {j2};
+        Joueur[] joueurs = {j0};
 
         Jeu j= new Jeu(joueurs);
         try{
