@@ -16,17 +16,13 @@ public class Strat88 extends Strat{
     private int indexActuelLotissements = 0;
     private int numeroInterim = 0;
     private final double[][] basePositions = {
-            /*{1.5, 3.5, 5.1, 6.2, 7, 8.44, 9.46, 10.59, 12.09, 14.5},
-            {1.78, 3.65, 4.8, 6, 6.8, 8., 8.86, 9.78, 10.86, 12.35, 14.22},
-            {1, 2.5, 3.8, 5.2, 6, 7, 8, 9, 10, 11.5, 13, 15}*/
-            {1, 2, 3, 6.2, 7, 8.44, 9.46, 10.59, 12.09, 14.5},
-            {5.2, 6.5, 7.4, 8.2, 9, 9.8, 10.8, 12, 13, 14, 15},
-            {1, 2.5, 3.8, 5.2, 6, 7, 8, 9, 10, 11.5, 13, 15}
+            {1, 2, 3, 6.2, 7, 8, 9.46, 10.59, 12.09, 13.5},
+            {1.5, 4.4, 5.5, 7.3, 8.5, 9.5, 10.7, 12, 13, 14, 15},
+            {1, 2.5, 4, 5.2, 6, 7, 8, 9, 10, 11.5, 13, 14.5}
     };
-    private final double[] ecartParametre = {3, 1, 2};
     private final double[] probabilites = {9./81, 8./81, 7./81, 6./81, 5./81, 4./81, 3./81, 3./81, 3./81, 4./81, 5./81, 6./81, 7./81, 8./81, 9./81};
     private final int[] emplacementsPiscines = {2, 6, 7, 103, 107, 201, 206, 210};
-    private final int[] emplacementsBarrieres = {206, 106, 6, 110, 109, 108, 107, 8, 7, 9};
+    private final int[] emplacementsBarrieres = {206, 106, 6, 110, 109, 108, 107, 7, 8, 9};
     private final int[] upgradesLotissements = {1, 6, 6, 6, 6, 2, 2};
 
     public Strat88(){
@@ -60,7 +56,7 @@ public class Strat88 extends Strat{
 
     @Override
     public int choixEmplacement(Jeu j, int joueur, int numero, ArrayList<Integer> placeValide) {
-        emplacementMaisonIndex = getEmplacementMaison(numero, placeValide);
+        emplacementMaisonIndex = getEmplacementMaison(numero, placeValide, ((Travaux) j.actions[indexNumero].top()).getAction());
         return emplacementMaisonIndex == -1 ? 0 : emplacementMaisonIndex;
     }
 
@@ -106,42 +102,25 @@ public class Strat88 extends Strat{
     //Méthodes pour les choix
 
     //Méthode qui cherche l'index idéal dans placesValide
-    public int getEmplacementMaison(int numero, ArrayList<Integer> placesValides) {
+    public int getEmplacementMaison(int numero, ArrayList<Integer> placesValides, int action) {
         if (placesValides.isEmpty()) {
             return -1;
         }
+        if (action == 0) {
+            double ecart = 100;
+            int index = 0;
+            for (int i = 1 ; i < emplacementsPiscines.length ; i++) {
 
-        /*ArrayList<Integer> placesRues0 = getPossibilitesByRue(placesValides, 0);
-        ArrayList<Integer> placesRues1 = getPossibilitesByRue(placesValides, 1);
-        ArrayList<Integer> placesRues2 = getPossibilitesByRue(placesValides, 2);
-        double ecart = 100;
-        int index = -1;
-
-        for (Integer integer : placesRues2) {
-            double tempEcart = Math.abs(basePositions[2][integer % 100] - numero);
-            if (tempEcart <= ecartParametre[2]) {
-                return placesValides.indexOf(integer);
+                if (placesValides.contains(emplacementsPiscines[i])) {
+                    double tempEcart = Math.abs(basePositions[emplacementsPiscines[i] / 100][emplacementsPiscines[i] % 100] - numero);
+                    if (tempEcart < ecart) {
+                        ecart = tempEcart;
+                        index = placesValides.indexOf(emplacementsPiscines[i]);
+                    }
+                }
             }
+            if (ecart < 0.68) return index;
         }
-
-        for (Integer integer : placesRues1) {
-            double tempEcart = Math.abs(basePositions[1][integer % 100] - numero);
-            if (tempEcart < ecart && tempEcart < ecartParametre[1]) {
-                ecart = tempEcart;
-                index = placesValides.indexOf(integer);
-            }
-        }
-        if (ecart != 100) {
-            return index;
-        }
-
-        for (Integer integer : placesRues0) {
-            double tempEcart = Math.abs(basePositions[0][integer % 100] - numero);
-            if (tempEcart < ecart && tempEcart < ecartParametre[0]) {
-                ecart = tempEcart;
-                index = placesValides.indexOf(integer);
-            }
-        }*/
 
         double ecart = Math.abs(basePositions[placesValides.getLast() / 100][placesValides.getLast() % 100] - numero);
         int indexEcartMin = placesValides.size() - 1;
@@ -165,14 +144,14 @@ public class Strat88 extends Strat{
         //Logique de pondération
         for (int i = 0 ; i < 3 ; i++) {
             ArrayList<Integer> placesValides = construirePossibilite(numeros[i], jeu.joueurs[joueur]);
-            int emplacementIndex = getEmplacementMaison(numeros[i], placesValides);
+            int emplacementIndex = getEmplacementMaison(numeros[i], placesValides, actions[i]);
 
             if (emplacementIndex >= 0) {
                 poids[i] += 65 * (probabilites[numeros[i] - 1]);
                 switch(actions[i]) {
                     case 0:
                         if (contains(emplacementsPiscines, placesValides.get(emplacementIndex))){
-                            poids[i] += 15;
+                            poids[i] += 20;
                         }
                         break;
                     case 3:
@@ -188,7 +167,7 @@ public class Strat88 extends Strat{
                         for (int j = -2 ; j <= 2 ; j++) {
                             if (numeros[i] + j >= 0) {
                                 ArrayList<Integer> placesValidesInterim = construirePossibilite(numeros[i] + j, jeu.joueurs[joueur]);
-                                int emplacementInterim = getEmplacementMaison(numeros[i] + j, placesValidesInterim);
+                                int emplacementInterim = getEmplacementMaison(numeros[i] + j, placesValidesInterim, actions[i]);
                                 double poidsActuel = 65 * probabilites[Math.max(0, Math.min(numeros[i] + j - 1, 14))];
                                 if (emplacementInterim >= 0 && poidsActuel > poids[i]) {
                                     poids[i] = poidsActuel;
@@ -212,7 +191,6 @@ public class Strat88 extends Strat{
         }
         return maxIndex;
     }
-
 
     //Méthodes pour aider à faire les choix
     public ArrayList<Integer> construirePossibilite(int numero, Joueur joueur) {
