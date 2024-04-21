@@ -5,13 +5,14 @@ Par Jules RAMAEN
 
 Cette stratégie se base sur un plateau ideal, et cherche à placer les numéros en respectant ce plateau.
 Les numéros des rues 0 et 1 sont placés de manière exacte, et les numéros de la dernière rue sont placés avec une fonction de minimisation des écarts.
-J'ai voulu généraliser la méthode des écarts mais le score ne s'améliorait pas, je garde donc cette méthode.
+J'ai voulu généraliser la méthode des écarts aux trois rues mais le score ne s'améliorait pas, je garde donc cette méthode.
 Les décisions sont prises dans choixCombinaison, et on utilise des variables globales pour renvoyer les valeurs nécessaires dans les autres méthodes.
-Lotissements : 4x6, 1x4 et 5x1 si on trouve l'objectif {1, 1, 1, 4}, 4x6 et 9x1 par défaut.
+Lotissements : 4x6, 1x4 et 5x1 si on a l'objectif {1, 1, 1, 4}, 4x6 et 9x1 par défaut.
 Valorisation des 1 puis des 6 en priorité.
 Les parcs sont toujours remplis en priorité, les piscines uniquement quand elles sont optimales.
 Si on ne trouve pas de carte action placable, on regarde uniquement les numéros.
 Si on ne parvient toujours pas à placer une carte, on teste les intérimaires.
+En dernier recours, on choisit une carte qu'on peut placer, même si cela ne respecte pas le plateau ideal
 Score moyen : 104.8
 ########################################################################################################################
  */

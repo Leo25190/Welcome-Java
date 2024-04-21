@@ -11,7 +11,7 @@ public class Main {
         Scanner s = new Scanner(System.in);
         //Mode 1 : plein de parties - Mode 2 : détail de la partie
         System.out.println("CHOIX DU TYPE DE TEST\nMode 1 : plein de parties - Mode 2 : détail de la partie");
-        lancerMode(s.nextInt());
+        lancerMode(1);
         s.close();
     }
 
@@ -25,8 +25,10 @@ public class Main {
     
     public static void exempleLanceIA() {   //TEST 1
         try{
-            TousEnsemble t = new TousEnsemble(new int[] {88}, 100);
+            TousEnsemble t = new TousEnsemble(new int[] {241, 88}, 10000);
+            Championnat1v1 c = new Championnat1v1(new int[] {241, 88}, 10000);
             t.run();
+            //c.run();
         }        
         catch(Exception e){
             e.printStackTrace();
