@@ -12,7 +12,7 @@ Valorisation des 1 puis des 6 en priorité.
 Les parcs sont toujours remplis en priorité, les piscines uniquement quand elles sont optimales.
 Si on ne trouve pas de carte action placable, on regarde uniquement les numéros.
 Si on ne parvient toujours pas à placer une carte, on teste les intérimaires.
-Score moyen : 104
+Score moyen : 104.8
 ########################################################################################################################
  */
 package welcome.ia;
@@ -26,7 +26,7 @@ import java.util.Collections;
 
 public class Strat241 extends Strat{
     //Variables globales utilisées pour suivre l'avancement de la stratégie
-    private final boolean affichage_decisions = true;  //Active l'affichage des décisions de l'algo pour le débug
+    private final boolean affichage_decisions = false;  //Active l'affichage des décisions de l'algo pour le débug
     private int[] nombre_parcs; //Compte le nombre de parcs par ligne
     private int nombre_agents;  //Compte le nombre d'agents immobilisers utilisés
     private int nombre_barrieres;   //Compte le nombre de barrières placées
@@ -258,6 +258,9 @@ public class Strat241 extends Strat{
             if(!possibilites_par_pioche.get(pioche_idx).isEmpty()){
                 bestPiocheFound = true;
                 res = pioche_idx;
+
+                if(affichage_decisions)
+                    System.out.println("################################## LAST CHANCE " + emplacement_choisi);
             }
         }
 
@@ -343,6 +346,7 @@ public class Strat241 extends Strat{
         Arrays.fill(nombre_parcs, 0);
         premier_tour = true;
         nombre_bis = 0;
+        plans.clear();
     }
 
 
