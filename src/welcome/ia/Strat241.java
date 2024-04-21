@@ -1,11 +1,19 @@
 /*
-########################################################
--------------------STRATEGIE 241------------------------
+########################################################################################################################
+-------------------------------------------------STRATEGIE 241----------------------------------------------------------
+Par Jules RAMAEN
 
-Cette stratégie se base sur un plateau ideal, et cherche à placer les numéros en respectant ce plan.
-Lotissements : 4x6, 1x4 et 5x1 si on trouve l'objectif {1, 1, 1, 4}, 4x6 et 9x1 par défaut
-Score moyen : 103.5
-########################################################
+Cette stratégie se base sur un plateau ideal, et cherche à placer les numéros en respectant ce plateau.
+Les numéros des rues 0 et 1 sont placés de manière exacte, et les numéros de la dernière rue sont placés avec une fonction de minimisation des écarts.
+J'ai voulu généraliser la méthode des écarts mais le score ne s'améliorait pas, je garde donc cette méthode.
+Les décisions sont prises dans choixCombinaison, et on utilise des variables globales pour renvoyer les valeurs nécessaires dans les autres méthodes.
+Lotissements : 4x6, 1x4 et 5x1 si on trouve l'objectif {1, 1, 1, 4}, 4x6 et 9x1 par défaut.
+Valorisation des 1 puis des 6 en priorité.
+Les parcs sont toujours remplis en priorité, les piscines uniquement quand elles sont optimales.
+Si on ne trouve pas de carte action placable, on regarde uniquement les numéros.
+Si on ne parvient toujours pas à placer une carte, on teste les intérimaires.
+Score moyen : 104
+########################################################################################################################
  */
 package welcome.ia;
 
@@ -17,12 +25,12 @@ import java.util.Arrays;
 import java.util.Collections;
 
 public class Strat241 extends Strat{
-    // bot de la mort qui tue
-    private final boolean affichage_decisions = false;  //Active l'affichage des décisions de l'algo
+    //Variables globales utilisées pour suivre l'avancement de la stratégie
+    private final boolean affichage_decisions = true;  //Active l'affichage des décisions de l'algo pour le débug
     private int[] nombre_parcs; //Compte le nombre de parcs par ligne
     private int nombre_agents;  //Compte le nombre d'agents immobilisers utilisés
     private int nombre_barrieres;   //Compte le nombre de barrières placées
-    private static int nombre_bis; //compte les bis
+    private static int nombre_bis; //Compte les bis
 
     private final static double[][] plateau_ideal = new double[][] {   //Création d'un plateau idéal
             {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
@@ -30,7 +38,7 @@ public class Strat241 extends Strat{
             {3.4, 4.4, 5.4, 6.4, 7.4, 8.4, 8.6, 9.6, 10.6, 11.6, 12.6, 13.6}
     };
     private final static double max_ecart = 2.5;  //Pour les fonctions de recherche de minimum pour la dernière rue
-    private int emplacement_choisi; //Emplacement préférable
+    private int emplacement_choisi; //Emplacement préférable déterminé dans choixCombinaison
     private int emplacement_gap;    //Emplacement d'un trou entre deux nombres si on en trouve un
     private static int valeur_interimaire; //Valeur ajoutée au numéro dans le cas d'un intérimaire
 
@@ -71,7 +79,7 @@ public class Strat241 extends Strat{
 
     @Override
     public String nomJoueur(){
-        return "JulesLaBulle3";
+        return "RAMAEN, Jules";
     }
 
     //Choisit la meilleure pioche
@@ -93,8 +101,10 @@ public class Strat241 extends Strat{
             premier_tour = false;
         }
 
+        /*
         if(affichage_decisions)
             System.out.println("REMPLISSAGE " + remplissagePlateau(j, joueur)*100 + " %");
+        */
 
         //Choix des emplacements de barrières en fonction des plans
         //Plan le plus interressant
@@ -110,11 +120,11 @@ public class Strat241 extends Strat{
             nombre_agents_necessaires = 5;
         }
 
-        ArrayList<ArrayList> possibilites_par_pioche = new ArrayList<>();
+        ArrayList<ArrayList<Integer>> possibilites_par_pioche = new ArrayList<>();
         ArrayList<Integer> actions = new ArrayList<>();
         ArrayList<Integer> numeros = new ArrayList<>();
 
-        for(int pioche_idx = 0; pioche_idx < 3; pioche_idx++){ //Construction des possibilités et des tableaux action et numero
+        for(int pioche_idx = 0; pioche_idx < 3; pioche_idx++){ //Construction des possibilités et des tableaux actions et numeros
 
             possibilites_par_pioche.add(construirePossibilite(((Travaux)j.numeros[pioche_idx].top()).getNumero(), j.joueurs[joueur])); //On a toutes les possibilités pour chaque pioche
 
@@ -243,6 +253,14 @@ public class Strat241 extends Strat{
             }
         }
 
+        //Si on ne trouve rien, on cherche à renvoyer la pioche pour laquelle on peut placer la carte, même sans respecter le plateau ideal
+        for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
+            if(!possibilites_par_pioche.get(pioche_idx).isEmpty()){
+                bestPiocheFound = true;
+                res = pioche_idx;
+            }
+        }
+
         //Si rien n'est trouvé malgré tout -> Refus de Permis ou plateau rempli
         if(res<0 || res>2) {
             res = RandomSingleton.getInstance().nextInt(3);
@@ -286,17 +304,16 @@ public class Strat241 extends Strat{
     //Choisit le nombre pour les intérimaires
     @Override
     public int choixNumero(Jeu j, int joueur, int numero){
-        int res= numero + valeur_interimaire;
+        int res= numero + valeur_interimaire;   //On applique l'écart calculé dans choixCombinaison
         return res;
     }
 
-    //Valorise en priorité les 6 puis les 1
+    //Valorise en priorité les 1 puis les 6
     @Override
     public int valoriseLotissement(Jeu j, int joueur){
         int res = valorisations_lotissement_optimales[nombre_agents];
-        if(nombre_agents < valorisations_lotissement_optimales.length-1){
+        if(nombre_agents < valorisations_lotissement_optimales.length-1)
             nombre_agents++;
-        }
         return res;
     }
 
@@ -304,10 +321,11 @@ public class Strat241 extends Strat{
     @Override
     public int choixBarriere(Jeu j, int joueur,  ArrayList<Integer> placeValide){
         int res = placeValide.indexOf(choix_barriere_optimale[nombre_barrieres]);
-        if(nombre_barrieres < choix_barriere_optimale.length-1)
+        if(nombre_barrieres < choix_barriere_optimale.length-2) //On incrémente jusqu'au nombre de barrières nécessaires à la stratégie, puis on renvoie 0 à chaque fois.
             nombre_barrieres++;
 
-        if(res < 0 || res > placeValide.size()-1)   //Par sécurité
+        //Si on ne trouve pas, c'est qu'on ne veut plus placer de barrières
+        if(res < 0 || res > placeValide.size()-1)
             res = 0;
         return res;
     }
@@ -322,10 +340,10 @@ public class Strat241 extends Strat{
     public void resetStrat(){
         nombre_agents = 0;
         nombre_barrieres = 0;
-        for(int i = 0; i < nombre_parcs.length; i++){nombre_parcs[i] = 0;}
+        Arrays.fill(nombre_parcs, 0);
         premier_tour = true;
         nombre_bis = 0;
-    };
+    }
 
 
     // --------- MES FONCTIONS ----------
@@ -522,6 +540,6 @@ public class Strat241 extends Strat{
                 }
             }
         }
-        return 1 - (double) nombre_places_vides / nombre_places_total; // Effectuer une division avec des nombres à virgule flottante
+        return 1 - (double) nombre_places_vides / nombre_places_total;
     }
 }
