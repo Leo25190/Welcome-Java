@@ -55,8 +55,8 @@ public class Strat241 extends Strat{
     private static int nombre_agents_necessaires; //Le nombre d'agents immobiliers nécessaires pour mener à bien la stratégie
 
     //Variables pour les bis, non utilisées car n'améliore pas le score
-    private final static int nombre_bis_max = 3;
-    private final static double taux_remplissage_min_pour_bis = 0.95;
+    private final static int nombre_bis_max = 2;
+    private final static double taux_remplissage_min_pour_bis = 0;
 
     //Gestion des plans
     private ArrayList<Plan> plans = new ArrayList<>();
@@ -101,10 +101,8 @@ public class Strat241 extends Strat{
             premier_tour = false;
         }
 
-        /*
         if(affichage_decisions)
             System.out.println("REMPLISSAGE " + remplissagePlateau(j, joueur)*100 + " %");
-        */
 
         //Choix des emplacements de barrières en fonction des plans
         //Plan le plus interressant
@@ -134,24 +132,6 @@ public class Strat241 extends Strat{
 
         //On parcourt les pioches pour chaque carte action qui nous interresse selon l'ordre de priorité suivant
         boolean bestPiocheFound = false;
-
-        //BIS POUR COMBLER LES GAPS -> N'améliore pas le score malgré tout
-        /*
-        for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound && remplissagePlateau(j, joueur) > taux_remplissage_min_pour_bis; pioche_idx++){   //On cherche à combler les trous seulement si le plateau est déja bien rempli
-            if(action.get(pioche_idx) == 3 &&  isGap(j, joueur)>= 0 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur)>=0 && nombre_bis <= nombre_bis_max){
-                res = pioche_idx;
-                bestPiocheFound = true;
-
-                emplacement_choisi = meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numero.get(pioche_idx), j, joueur);
-                emplacement_gap = isGap(j, joueur);
-                nombre_bis++;
-
-                if(affichage_decisions)
-                    System.out.println("################################## BIS " + emplacement_choisi + " // GAP " + emplacement_gap);
-
-            }
-        }
-        */
 
         //PARCS
         for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound; pioche_idx++){
@@ -208,6 +188,24 @@ public class Strat241 extends Strat{
 
             }
         }
+
+        //BIS POUR COMBLER LES GAPS -> N'améliore pas le score malgré tout
+        /*
+        for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound && remplissagePlateau(j, joueur) > taux_remplissage_min_pour_bis; pioche_idx++){   //On cherche à combler les trous seulement si le plateau est déja bien rempli
+            if(actions.get(pioche_idx) == 3 &&  isGap(j, joueur)>= 0 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numeros.get(pioche_idx), j, joueur)>=0 && nombre_bis <= nombre_bis_max){
+                res = pioche_idx;
+                bestPiocheFound = true;
+
+                emplacement_choisi = meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numeros.get(pioche_idx), j, joueur);
+                emplacement_gap = isGap(j, joueur);
+                nombre_bis++;
+
+                if(affichage_decisions)
+                    System.out.println("################################## BIS " + emplacement_choisi + " // GAP " + emplacement_gap);
+
+            }
+        }
+        */
 
         //CAS PAR DEFAUT
         //Si on ne trouve pas de carte action utilisable, on cherche le meilleur numero à placer
@@ -272,6 +270,10 @@ public class Strat241 extends Strat{
                 System.out.println("################################## RAMDOM " + res);
         }
 
+        possibilites_par_pioche.clear();
+        actions.clear();
+        numeros.clear();
+
         return res;
     }
 
@@ -280,8 +282,13 @@ public class Strat241 extends Strat{
     public int choixBis(Jeu j, int joueur, ArrayList<Integer> placeValide){
         int res=0;
 
+        ArrayList<Integer> placeValideAbs = new ArrayList<>();
+        for(int i = 0; i < placeValide.size(); i++){
+            placeValideAbs.add(Math.abs(placeValide.get(i)));       //On prend la valeur absolue pour récupérer l'indice du gap localisé
+        }
+
         if(emplacement_gap != -1) {     //Emplacement déjà choisi - Non utilisé
-            res = placeValide.indexOf(emplacement_gap);
+            res = placeValideAbs.indexOf(emplacement_gap);
             emplacement_gap = -1;
         }
 
