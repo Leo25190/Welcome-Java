@@ -3,19 +3,8 @@
 -------------------------------------------------STRATEGIE 242----------------------------------------------------------
 Par Jules RAMAEN
 
-test de dvlpt de gestion totale des objectifs
-
-Cette stratégie se base sur un plateau ideal, et cherche à placer les numéros en respectant ce plateau.
-Les numéros des rues 0 et 1 sont placés de manière exacte, et les numéros de la dernière rue sont placés avec une fonction de minimisation des écarts.
-J'ai voulu généraliser la méthode des écarts aux trois rues mais le score ne s'améliorait pas, je garde donc cette méthode.
-Les décisions sont prises dans choixCombinaison, et on utilise des variables globales pour renvoyer les valeurs nécessaires dans les autres méthodes.
-Lotissements : 4x6, 1x4 et 5x1 si on a l'objectif {1, 1, 1, 4}, 4x6 et 9x1 par défaut.
-Valorisation des 1 puis des 6 en priorité.
-Les parcs sont toujours remplis en priorité, les piscines uniquement quand elles sont optimales.
-Si on ne trouve pas de carte action placable, on regarde uniquement les numéros.
-Si on ne parvient toujours pas à placer une carte, on teste les intérimaires.
-En dernier recours, on choisit une carte qu'on peut placer, même si cela ne respecte pas le plateau ideal
-Score moyen : 104.8
+gestion totale des objectifs
+score moyen : 102
 ########################################################################################################################
  */
 package welcome.ia;
@@ -67,8 +56,6 @@ public class Strat242 extends Strat{
     private static ArrayList<Integer> choix_barriere_optimale = new ArrayList<>(); //Les choix de placement de barrières dans l'ordre, pour former des lotissements en fonction des plans
     private static ArrayList<Integer> valorisations_lotissement_optimales = new ArrayList<>(); //L'ordre de valorisation des lotissements en fonction des lotissements formés
 
-
-
     public Strat242() {
         this.nombre_parcs = new int[3];
         this.nombre_agents = 0;
@@ -105,37 +92,24 @@ public class Strat242 extends Strat{
                 }
 
                 if(affichage_decisions)
-                    System.out.println("#################################################################### " + plans.getLast());
+                    System.out.println("############################################# " + plans.getLast());
             }
             if(affichage_decisions){
                 System.out.println();
                 System.out.println("Lotissements a creer : " + lotissements_a_creer);
             }
 
+            //Déterminer les meilleures barrières et valorisations pour remplir les trois objectifs
             meilleursEmplacementsBarrieres(j, joueur);
             meilleuresValorisations(j, joueur);
 
-            if(affichage_decisions)
+            if(affichage_decisions) {
                 System.out.println("Barrières : " + choix_barriere_optimale);
+                System.out.println("Valorisations : " + valorisations_lotissement_optimales);
+            }
 
             premier_tour = false;
         }
-
-        /*
-        //Choix des emplacements de barrières en fonction des plans
-        //Plan le plus interressant
-        if(Arrays.equals(plans.getLast().tailleLotissements, new int[] {1, 1, 1, 4})){
-            choix_barriere_optimale = new int[] {206, 106, 6, 110, 109, 108, 107, 0};
-            valorisations_lotissement_optimales = new int[] {1, 6, 6, 6, 6, 4, 4, 4, 4, 2, 2, 3, 3, 3, 5, 5, 5, 5, 0};
-            nombre_agents_necessaires = 9;
-        }
-        //DEFAULT
-        else{
-            choix_barriere_optimale = new int[] {206, 106, 6, 110, 109, 108, 107, 9, 8, 7, 0};
-            valorisations_lotissement_optimales = new int[] {1, 6, 6, 6, 6, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0};
-            nombre_agents_necessaires = 5;
-        }
-        */
 
         ArrayList<ArrayList<Integer>> possibilites_par_pioche = new ArrayList<>();
         ArrayList<Integer> actions = new ArrayList<>();
@@ -211,8 +185,8 @@ public class Strat242 extends Strat{
             }
         }
 
-        //BIS POUR COMBLER LES GAPS -> N'améliore pas le score malgré tout
         /*
+        //BIS POUR COMBLER LES GAPS -> N'améliore pas le score malgré tout
         for(int pioche_idx = 0; pioche_idx < 3 && !bestPiocheFound && remplissagePlateau(j, joueur) > taux_remplissage_min_pour_bis; pioche_idx++){   //On cherche à combler les trous seulement si le plateau est déja bien rempli
             if(actions.get(pioche_idx) == 3 &&  isGap(j, joueur)>= 0 && meilleurEmplacementDefault(possibilites_par_pioche.get(pioche_idx), numeros.get(pioche_idx), j, joueur)>=0 && nombre_bis <= nombre_bis_max){
                 res = pioche_idx;
@@ -227,7 +201,7 @@ public class Strat242 extends Strat{
 
             }
         }
-        */
+         */
 
         //CAS PAR DEFAUT
         //Si on ne trouve pas de carte action utilisable, on cherche le meilleur numero à placer
@@ -344,7 +318,9 @@ public class Strat242 extends Strat{
     @Override
     public int valoriseLotissement(Jeu j, int joueur){
         int res = valorisations_lotissement_optimales.get(nombre_agents);
-        nombre_agents++;
+        if(nombre_agents < valorisations_lotissement_optimales.size()-1){
+            nombre_agents++;
+        }
         return res;
     }
 
@@ -377,6 +353,7 @@ public class Strat242 extends Strat{
         plans.clear();
         lotissements_a_creer.clear();
         choix_barriere_optimale.clear();
+        valorisations_lotissement_optimales.clear();
     }
 
 
@@ -572,7 +549,42 @@ public class Strat242 extends Strat{
     }
 
     void meilleuresValorisations(Jeu j, int joueur){
-        valorisations_lotissement_optimales = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 6, 2, 3, 4, 5, 6, 3, 4, 5, 6, 4, 5, 6, 0));
+        //valorisations_lotissement_optimales = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 6, 2, 3, 4, 5, 6, 3, 4, 5, 6, 4, 5, 6, 0));
+        ArrayList<Integer> tailles_lotissements = new ArrayList<>();
+        ArrayList<Integer> occur_lotissements = new ArrayList<>();
+
+        //Récupère les différentes tailles de lotissement
+        for(int i = 0; i < lotissements_a_creer.size(); i++){
+            if(!tailles_lotissements.contains(lotissements_a_creer.get(i))){
+                tailles_lotissements.add(lotissements_a_creer.get(i));
+            }
+        }
+
+        //Compte le nombre d'occurence de chaque lotissement
+        for(int i = 0; i < tailles_lotissements.size(); i++){
+            occur_lotissements.add(Collections.frequency(lotissements_a_creer, tailles_lotissements.get(i)));
+        }
+
+        //Classe les lotissements en fonction de leur nombre d'apparitions et les place dans valorisations_lotissements_optimales
+        while(!tailles_lotissements.isEmpty()){
+            int max_occur = Collections.max(occur_lotissements);
+            int max_idx = occur_lotissements.indexOf(max_occur);
+            int max_lotissement = tailles_lotissements.get(max_idx);
+
+            if(max_lotissement < 4){
+                for(int k = 0; k < max_lotissement; k++){
+                    valorisations_lotissement_optimales.add(max_lotissement);
+                }
+            }
+            else{
+                for(int k = 0; k < 4; k++){
+                    valorisations_lotissement_optimales.add(max_lotissement);
+                }
+            }
+
+            tailles_lotissements.remove(max_idx);
+            occur_lotissements.remove(max_idx);
+        }
     }
 
     //Check si une rue est pleine
