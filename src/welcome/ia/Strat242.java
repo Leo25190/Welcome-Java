@@ -84,7 +84,7 @@ public class Strat242 extends Strat{
 
     @Override
     public String nomJoueur(){
-        return "RAMAEN, Jules";
+        return "Jules on the beat";
     }
 
     //Choisit la meilleure pioche
