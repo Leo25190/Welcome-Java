@@ -4,7 +4,7 @@
 Par Jules RAMAEN
 
 gestion totale des objectifs
-score moyen : 102
+score moyen : 102.7
 ########################################################################################################################
  */
 package welcome.ia;
