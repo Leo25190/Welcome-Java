@@ -549,7 +549,6 @@ public class Strat242 extends Strat{
     }
 
     void meilleuresValorisations(Jeu j, int joueur){
-        //valorisations_lotissement_optimales = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 6, 2, 3, 4, 5, 6, 3, 4, 5, 6, 4, 5, 6, 0));
         ArrayList<Integer> tailles_lotissements = new ArrayList<>();
         ArrayList<Integer> occur_lotissements = new ArrayList<>();
 
