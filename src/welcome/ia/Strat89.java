@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
-public class Strat88 extends Strat{
+public class Strat89 extends Strat{
 
     private int tour = 0;
     private int emplacementMaisonIndex = 0;
@@ -15,33 +15,64 @@ public class Strat88 extends Strat{
     private int indexActuelBarrieres = 0;
     private int indexActuelLotissements = 0;
     private int numeroInterim = 0;
-    private final int bisTour = 29;
+    private final int bisTour = 30;
     private final double[][] basePositions = {
-            {1, 2, 3.7, 6.2, 7.2, 8, 9.46, 10.59, 12.09, 13.5},
+            {1, 2, 3, 6.2, 7, 8, 9.46, 10.59, 12.09, 13.5},
             {1.5, 4.4, 5.5, 7.3, 8.5, 9.5, 10.7, 12, 13, 14, 15},
             {1, 2.5, 4, 5.2, 6, 7, 8, 9, 10, 11.5, 13, 14.5}
     };
-    private final double[] probabilites = {15./81, 10./81, 7./81, 6./81, 5./81, 4./81, 3./81, 3./81, 3./81, 4./81, 5./81, 6./81, 7./81, 10./81, 15./81};
+    private final double[] probabilites = {9./81, 8./81, 7./81, 6./81, 5./81, 4./81, 3./81, 3./81, 3./81, 4./81, 5./81, 6./81, 7./81, 8./81, 9./81};
     private final int[] emplacementsPiscines = {2, 6, 7, 103, 107, 201, 206, 210};
-    private final int[] emplacementsBarrieres = {206, 106, 6, 110, 109, 108, 107, 7, 8, 9};
-    private final int[] upgradesLotissements = {1, 6, 6, 6, 6, 2, 2};
+    //private final int[] emplacementsBarrieres = {206, 106, 6, 110, 109, 108, 107, 7, 8, 9};
+    private ArrayList<Integer> emplacementsBarrieres = new ArrayList<>();
+    //private final int[] upgradesLotissements = {1, 6, 6, 6, 6, 2, 2};
+    private ArrayList<Integer> upgradesLotissements = new ArrayList<>();
 
-    public Strat88(){
+    public Strat89(){
     }
 
     @Override
     public String nomVille() {
-        return "Léo 1";
+        return "Léo 2";
     }
 
     @Override
     public String nomJoueur() {
-        return "Léo 1";
+        return "Léo 2";
     }
 
     @Override
     public int choixCombinaison(Jeu j, int joueur){
         tour++;
+        if (tour == 1) {
+            int[] places = new int[3];
+            Integer[] nombresLotissements = {1, 2, 3, 4, 5, 6};
+            for (Plan plan : j.plans) {
+                for (int taille : plan.tailleLotissements) {
+                    nombresLotissements[taille - 1] += 10;
+                    for (int i = 0 ; i < 3 ; i++) {
+                        if (places[i] + taille <= 10 + i) {
+                            places[i] += taille;
+                            emplacementsBarrieres.add(i * 100 + places[i]);
+                            i += 5;
+                        }
+                    }
+                }
+            }
+            Arrays.sort(nombresLotissements, Collections.reverseOrder());
+            upgradesLotissements.add(1);
+            for (int nombre : nombresLotissements) {
+                if (nombre % 10 < 2) {
+                    for (int i = 0 ; i < nombre % 2 ; i++) {
+                        upgradesLotissements.add(nombre % 10);
+                    }
+                } else {
+                    for (int i = 0 ; i < 4 ; i++) {
+                        upgradesLotissements.add(nombre % 10);
+                    }
+                }
+            }
+        }
 
         indexNumero = indexChoixNumero(j, joueur);
         return indexNumero;
@@ -63,26 +94,26 @@ public class Strat88 extends Strat{
 
     @Override
     public int choixBis(Jeu j, int joueur, ArrayList<Integer> placeValide) {
-        return tour >= bisTour + j.joueurs[joueur].refusPermis && placeValide.size() >= 2 ? 1 : 0;
+        return 0;
     }
 
     @Override
     public int valoriseLotissement(Jeu j, int joueur) {
-        if (indexActuelLotissements < upgradesLotissements.length) {
+        if (indexActuelLotissements < upgradesLotissements.size()) {
             indexActuelLotissements++;
-            return upgradesLotissements[indexActuelLotissements - 1];
+            return upgradesLotissements.get(indexActuelLotissements - 1);
         }
         return 1;
     }
 
     @Override
     public int choixBarriere(Jeu j, int joueur, ArrayList<Integer> placeValide) {
-        if (indexActuelBarrieres < emplacementsBarrieres.length) {
+        if (indexActuelBarrieres < emplacementsBarrieres.size()) {
             indexActuelBarrieres++;
-            int index = placeValide.indexOf(emplacementsBarrieres[indexActuelBarrieres - 1]);
+            int index = placeValide.indexOf(emplacementsBarrieres.get(indexActuelBarrieres - 1));
             return index == - 1 ? 0 : index;
         }
-        return placeValide.size() >= 2 ? 1 : 0;
+        return placeValide.size() - 1;
     }
 
     @Override
@@ -98,6 +129,8 @@ public class Strat88 extends Strat{
         indexActuelBarrieres = 0;
         indexActuelLotissements = 0;
         numeroInterim = 0;
+        emplacementsBarrieres = new ArrayList<>();
+        upgradesLotissements = new ArrayList<>();
     }
 
     //Méthodes pour les choix
@@ -152,16 +185,16 @@ public class Strat88 extends Strat{
                 switch(actions[i]) {
                     case 0:
                         if (contains(emplacementsPiscines, placesValides.get(emplacementIndex))){
-                            poids[i] += 14;
+                            poids[i] += 20;
                         }
                         break;
                     case 3:
-                        if (jeu.joueurs[joueur].ville.nbParcs[placesValides.get(emplacementIndex) / 100] < 3 + placesValides.get(emplacementIndex) / 100) {
-                            poids[i] += 16;
+                        if (jeu.joueurs[joueur].ville.nbParcs[placesValides.get(emplacementIndex) / 100] < 4 + placesValides.get(emplacementIndex) / 100) {
+                            poids[i] += 10;
                         }
                         break;
                     case 4:
-                        poids[i] += 10;
+                        poids[i] += 8;
                         break;
                     case 1:
                         numeroInterim = numeros[i];
@@ -178,10 +211,7 @@ public class Strat88 extends Strat{
                         }
                         break;
                     case 5:
-                        poids[i] += 12;
-                        break;
-                    case 2:
-                        if (tour >= bisTour + jeu.joueurs[joueur].refusPermis) poids[i] += 15;
+                        poids[i] += 10;
                         break;
                 }
             }

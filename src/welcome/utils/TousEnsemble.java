@@ -37,12 +37,12 @@ public class TousEnsemble extends Tournoi{
             final int[] valeursFinal = scorePartie;
             Arrays.sort(classement, Comparator.comparingInt(i -> valeursFinal[i]));
             
-            System.out.println(Couleur.ROUGE + Couleur.FOND_CYAN + "Partie " + (h+1) + ":" + Couleur.RESET);
+            //System.out.println(Couleur.ROUGE + Couleur.FOND_CYAN + "Partie " + (h+1) + ":" + Couleur.RESET);
             scoreTmp=500;
             place=0;
             cpt=1;
             for(int i=classement.length-1; i>=0; i--){
-                System.out.println(this.participants[classement[i]].nom + " a fini avec " + scorePartie[classement[i]] + " points.");
+                //System.out.println(this.participants[classement[i]].nom + " a fini avec " + scorePartie[classement[i]] + " points.");
                 if(scorePartie[classement[i]]<scoreTmp){
                     place+=cpt;
                     cpt=1;
@@ -56,7 +56,7 @@ public class TousEnsemble extends Tournoi{
                     score[classement[i]][1]+=scorePartie[classement[i]];
                 }
             }
-            System.out.println("");
+            //System.out.println("");
 
             j.reset();
             for(int i=0; i<this.participants.length; i++)
