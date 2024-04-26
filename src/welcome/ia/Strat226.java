@@ -178,7 +178,7 @@ public class Strat226 extends Strat{
         } else if(placeValide.contains(106)) {
             return placeValide.indexOf(106);
         }
-        return 1;
+        return placeValide.size() >= 2 ? 1 : 0;
     }
 
     //On valide toujours les plans
