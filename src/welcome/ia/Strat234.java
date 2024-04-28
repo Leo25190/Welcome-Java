@@ -15,17 +15,17 @@ public class Strat234 extends Strat{
     }
 
     private ArrayList<Integer> construirePossibilite(int numero, Joueur joueur){
-        int min; // Variable utiles
-        ArrayList<Integer> possibilite= new ArrayList(); //List des possibilités Ã  construire
-        for(int i=0; i<3; i++){//Pour chaque rue
-            min=joueur.ville.rues[i].taille-1; //on part de la fin
+        int min;
+        ArrayList<Integer> possibilite= new ArrayList();
+        for(int i=0; i<3; i++){
+            min=joueur.ville.rues[i].taille-1;
             while(min>=0  && (joueur.ville.rues[i].maisons[min].numero==-1 || joueur.ville.rues[i].maisons[min].numero > numero))
-                min--; // on décrement le min tant qu'on a pas trouvé un numéro <=
+                min--;
             if(min<0 || joueur.ville.rues[i].maisons[min].numero!=numero){
 
-                min++;// On part de la case suivante
+                min++;
                 while(min < joueur.ville.rues[i].taille && joueur.ville.rues[i].maisons[min].numero == -1){
-                    possibilite.add((Integer)(min+ 100*i)); // on construit les possibilités tant qu'on a des cases vides
+                    possibilite.add((Integer)(min+ 100*i));
                     min++;
                 }
             }
@@ -57,43 +57,47 @@ public class Strat234 extends Strat{
     
     @Override
     public String nomVille(){
-        return "BidonVille";
+        return "JB";
     }
     
     @Override
     public String nomJoueur(){
-        return "RandMan";
+        return "PIERARD Jean-Baptiste";
     }
 
 
     @Override
     public int choixCombinaison(Jeu j, int joueur){
-        int[] numeros = {((Travaux) j.numeros[0].top()).getNumero(), ((Travaux) j.numeros[1].top()).getNumero(), ((Travaux) j.numeros[2].top()).getNumero()};
-        int[] actions = {((Travaux) j.actions[0].top()).getAction(), ((Travaux) j.actions[1].top()).getAction(), ((Travaux) j.actions[2].top()).getAction()};
         // On récupère les actions ainsi que les numeros
 
         //Parcourt des numéros pour voir si il est plaçable
         //Vérification pour les parcs
-        for (int i=0;i<actions.length;i++){
-            ArrayList<Integer> emplacements = construirePossibilite(numeros[i], j.joueurs[joueur]);
-            int placement = choixEmplacement(j, joueur, numeros[i], emplacements);
-            if (actions[i] == 3 && placement != 0 && j.joueurs[joueur].ville.nbParcs[placement / 100] < placement/100 + 2) {
+        for (int i=0;i<3;i++){
+            int numero = ((Travaux) j.numeros[i].top()).getNumero();
+            int action = ((Travaux) j.actions[i].top()).getAction();
+            ArrayList<Integer> emplacements = construirePossibilite(numero, j.joueurs[joueur]);
+            int placement = choixEmplacement(j, joueur, numero, emplacements);
+            if (action == 3 && placement != 0 && j.joueurs[joueur].ville.nbParcs[placement / 100] < placement/100 + 2) {
                 return i;
             }
         }
 
         //Vérification pour les géomètres
-        for (int i= 0;i<actions.length;i++){
-            ArrayList<Integer> emplacements = construirePossibilite(numeros[i], j.joueurs[joueur]);
-            if (actions[i] == 5 && peutConstruire(numeros[i], emplacements)) {
+        for (int i= 0;i<3;i++){
+            int numero = ((Travaux) j.numeros[i].top()).getNumero();
+            int action = ((Travaux) j.actions[i].top()).getAction();
+            ArrayList<Integer> emplacements = construirePossibilite(numero, j.joueurs[joueur]);
+            if (action == 5 && peutConstruire(numero, emplacements)) {
                 return i;
             }
         }
 
         //Vérification pour les agents immobiliers
-        for (int i= 0;i<actions.length;i++){
-            ArrayList<Integer> emplacements = construirePossibilite(numeros[i], j.joueurs[joueur]);
-            if (actions[i] == 4 && peutConstruire(numeros[i], emplacements)) {
+        for (int i= 0;i<3;i++){
+            int numero = ((Travaux) j.numeros[i].top()).getNumero();
+            int action = ((Travaux) j.actions[i].top()).getAction();
+            ArrayList<Integer> emplacements = construirePossibilite(numero, j.joueurs[joueur]);
+            if (action == 4 && peutConstruire(numero, emplacements)) {
                 return i;
             }
         }
@@ -102,11 +106,12 @@ public class Strat234 extends Strat{
         //Si aucun numéro n'est trouvé avec les actions voulues, alors on utilise le numéros qui peut être placé le plus loin de 8
         int index = 0;
         int ecart = 0;
-        for (int i=0;i<numeros.length;i++) {
-            ArrayList<Integer> emplacements = construirePossibilite(numeros[i], j.joueurs[joueur]);
-            int placement = choixEmplacement(j, joueur, numeros[i], emplacements);
+        for (int i=0;i<3;i++) {
+            int numero = ((Travaux) j.numeros[i].top()).getNumero();
+            ArrayList<Integer> emplacements = construirePossibilite(numero, j.joueurs[joueur]);
+            int placement = choixEmplacement(j, joueur, numero, emplacements);
             int ecartActuel = !emplacements.isEmpty() ? Math.abs(8 - emplacements.get(placement)) : 0;
-            if (ecartActuel > ecart && peutConstruire(numeros[i], emplacements)) {
+            if (ecartActuel > ecart && peutConstruire(numero, emplacements)) {
                 index = i;
                 ecart = ecartActuel;
             }

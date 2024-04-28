@@ -3,6 +3,7 @@ package welcome.ia;
 import welcome.Jeu;
 import welcome.Joueur;
 import welcome.Travaux;
+import welcome.utils.Couleur;
 
 import java.util.ArrayList;
 
@@ -22,12 +23,12 @@ public class Strat167 extends Strat{
 
     @Override
     public String nomVille(){
-        return "Ranch";
+        return "WestCoastRanch";
     }
 
     @Override
     public String nomJoueur(){
-        return "WestWoast";
+        return "KASRAOUI Wessim-Abderazak";
     }
 
     //Choix du numéro par pondération
@@ -119,19 +120,38 @@ public class Strat167 extends Strat{
 
     //Méthodes utiles
     //Copie de construire possibilite servant à faire nos choix de pondération et d'emplacement avant choixEmplacement
-    private ArrayList<Integer> construirePossibilite(int numero, Joueur joueur){ // Copie de construirePossibilite
+    private ArrayList<Integer> construirePossibilite(int numero, Joueur joueur){
+        if(joueur.verbose){
+            //System.out.println(joueur.ville);
+            System.out.println("Possibilités de placement: position dans la rue (numero du choix à entrer au clavier)");
+        }
         int min; // Variable utiles
         ArrayList<Integer> possibilite= new ArrayList(); //List des possibilités Ã  construire
         for(int i=0; i<3; i++){//Pour chaque rue
             min=joueur.ville.rues[i].taille-1; //on part de la fin
+            if(joueur.verbose){
+                System.out.print("Rue " + (i+1) + ":");
+            }
             while(min>=0  && (joueur.ville.rues[i].maisons[min].numero==-1 || joueur.ville.rues[i].maisons[min].numero > numero))
                 min--; // on décrement le min tant qu'on a pas trouvé un numéro <=
             if(min<0 || joueur.ville.rues[i].maisons[min].numero!=numero){
+
                 min++;// On part de la case suivante
                 while(min < joueur.ville.rues[i].taille && joueur.ville.rues[i].maisons[min].numero == -1){
                     possibilite.add((Integer)(min+ 100*i)); // on construit les possibilités tant qu'on a des cases vides
+                    if(joueur.verbose){
+                        if(i==0)
+                            System.out.print("\t" + Couleur.CYAN + (min+1) + Couleur.RESET + "(" + (possibilite.size()-1) + ")");
+                        else if(i==1)
+                            System.out.print("\t" + Couleur.JAUNE + (min+1) + Couleur.RESET + "(" + (possibilite.size()-1) + ")");
+                        else
+                            System.out.print("\t" + Couleur.VERT + (min+1) + Couleur.RESET + "(" + (possibilite.size()-1) + ")");
+                    }
                     min++;
                 }
+            }
+            if(joueur.verbose){
+                System.out.println("");
             }
         }
         return possibilite;

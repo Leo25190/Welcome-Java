@@ -170,7 +170,6 @@ public class Strat226 extends Strat{
     //On fait des lotissements de 6 puis de 1 au début du plateau
     @Override
     public int choixBarriere(Jeu j, int joueur,  ArrayList<Integer> placeValide){
-        int[] barrieres = {206, 106, 4, 3, 2, 1, 110, 109, 108, 107, 0};
         if (placeValide.contains(4)) {
             return placeValide.indexOf(4);
         } else if(placeValide.contains(206)) {
