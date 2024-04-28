@@ -10,7 +10,7 @@ import java.util.ArrayList;
 // KASRAOUI Wessim-Abderazak
 // Stratégie (n°)
 // La stratégie ci-dessous se base sur un tableau idéal. Quand le numéro à placer a une place valide dans la ville alors il est placé en fonction de ce tableau idéal.
-// Les actions sont également prises en compte de telle sorte que si une piscine est choisie avec un 8 alors elle sera utilisée avant un 14 avec un bis par exemple.
+// Les actions sont également prises en compte dans l'ordre parcs, lotissements, valorisations
 // Ce système fonctionne avec une pondération en fonction de la rareté d'un numéro (s'il est plaçable) et de l'importance de son action associée.
 
 public class Strat167 extends Strat{
@@ -36,7 +36,7 @@ public class Strat167 extends Strat{
     public int choixCombinaison(Jeu j, int joueur){
         // La logique de cette méthode prend en compte le numéro (et s'il est plaçable sur le plateau) ainsi que l'action associée pour faire une pondération
         // Nous faisons cette pondération pour chaque pioche
-        int[] poidsActions = {0, 0, 0}; // initialisation des poids
+        double[] poidsActions = {0, 0, 0}; // initialisation des poids
 
         for (int i = 0 ; i < 3 ; i++) {
             int numero = ((Travaux) j.numeros[i].top()).getNumero();
@@ -45,15 +45,13 @@ public class Strat167 extends Strat{
 
             int index = meilleurChoixIndex(possibilites, numero, action);
 
-            if (index != -1) poidsActions[i] += Math.abs(numero - 8) + 1;
+            if (index != -1) poidsActions[i] += 0.1 * (Math.abs(numero - 8) + 1);
 
-            if (index != -1) { // On vérifie quelle action est associée au numéro actuel pour lui donner une pondération en fonction
-                int[] piscines = {2, 6, 7, 103, 107, 201, 206, 210};
-                if (action == 0 && contient(piscines, index)) poidsActions[i] += 20;
+            if (index != -1) {
                 int nbRue = possibilites.get(index) / 100;
                 int nbParcs = j.joueurs[joueur].ville.nbParcs[nbRue];
-                if (action == 3 && nbParcs < nbRue + 3) poidsActions[i] += 15;
-                if (action == 5) poidsActions[i] += 5;
+                if (action == 3 && nbParcs < nbRue + 3) poidsActions[i] += 7;
+                if (action == 5) poidsActions[i] += 6;
                 if (action == 4) poidsActions[i] += 4;
             }
         }
@@ -159,20 +157,11 @@ public class Strat167 extends Strat{
 
     //Méthode servant à trouver le meilleur index de placesValides en fonction d'un tableau idéal et du numéro choisit
     private int meilleurChoixIndex(ArrayList<Integer> placesValides, int numero, int action) {
-        int[] piscines = {2, 6, 7, 103, 107, 201, 206, 210};
         int[][] plateauIdeal= {
                 {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
-                {5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
+                {4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
                 {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}
         };
-        // Si piscine alors on ne s'arrête pas au premier numéro trouvé correspondant à notre plateau idéal
-        if (action == 0) {
-            for (int i = 0 ; i < placesValides.size() ; i++) {
-                if (contient(piscines, placesValides.get(i) / 100) && plateauIdeal[placesValides.get(i) / 100][placesValides.get(i) % 100] == numero) {
-                    return i;
-                }
-            }
-        }
 
         //On parcourt nos rues en sens inverse pour trouver en priorité un emplacement correspondant à notre plateau idéal dans les rues décroissantes
         for (int i = placesValides.size() - 1 ; i >= 0 ; i--) {
@@ -181,13 +170,5 @@ public class Strat167 extends Strat{
             }
         }
         return -1;
-    }
-
-    // Méthode servant à vérifier qu'un index est bien compris dans nos emplacement de piscine
-    private boolean contient(int[] tab, int num) {
-        for (int i = 0 ; i < tab.length ; i++) {
-            if (tab[i] == num) return true;
-        }
-        return false;
     }
 }
