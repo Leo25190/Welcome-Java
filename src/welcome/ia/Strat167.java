@@ -28,7 +28,7 @@ public class Strat167 extends Strat{
 
     @Override
     public String nomJoueur(){
-        return "KASRAOUI Wessim-Abderazak";
+        return "KASRAOUI, Wessim-Abderazak";
     }
 
     //Choix du numéro par pondération

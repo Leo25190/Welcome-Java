@@ -62,7 +62,7 @@ public class Strat234 extends Strat{
     
     @Override
     public String nomJoueur(){
-        return "PIERARD Jean-Baptiste";
+        return "PIERARD, Jean-Baptiste";
     }
 
 

@@ -41,7 +41,7 @@ public class Strat226 extends Strat{
 
     @Override
     public String nomJoueur(){
-        return "Robin Parrel";
+        return "PARREL, Robin";
     }
 
     //Choix en fonction des différentes conditions

@@ -22,7 +22,7 @@ public class Strat202 extends Strat{
     
     @Override
     public String nomJoueur(){
-        return "Léo Marquant";
+        return "MARQUANT, Léo";
     }
 
 
