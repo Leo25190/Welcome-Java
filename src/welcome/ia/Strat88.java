@@ -17,13 +17,13 @@ public class Strat88 extends Strat{
     private int numeroInterim = 0;
     private final int bisTour = 29;
     private final double[][] basePositions = {
-            {1, 2, 3.7, 6.2, 7.2, 8, 9.46, 10.59, 12.09, 13.5},
-            {1.5, 4.4, 5.5, 7.3, 8.5, 9.5, 10.7, 12, 13, 14, 15},
-            {1, 2.5, 4, 5.2, 6, 7, 8, 9, 10, 11.5, 13, 14.5}
+            {1.5, 3.2, 4.5, 6.2, 7.2, 8, 9.46, 10.59, 12, 13.5},
+            {2, 3.7, 5.2, 7.3, 8.6, 9.6, 10.7, 12, 13, 14, 15},
+            {1, 2.5, 4, 5.2, 6, 7, 8, 9, 10, 11.4, 13, 14.4}
     };
     private final double[] probabilites = {15./81, 10./81, 7./81, 6./81, 5./81, 4./81, 3./81, 3./81, 3./81, 4./81, 5./81, 6./81, 7./81, 10./81, 15./81};
     private final int[] emplacementsPiscines = {2, 6, 7, 103, 107, 201, 206, 210};
-    private final int[] emplacementsBarrieres = {206, 106, 6, 110, 109, 108, 107, 7, 8, 9};
+    private final int[] emplacementsBarrieres = {206, 106, 6, 110, 109, 108, 107, 7, 8, 9, 5, 4, 3, 2};
     private final int[] upgradesLotissements = {1, 6, 6, 6, 6, 2, 2};
 
     public Strat88(){
