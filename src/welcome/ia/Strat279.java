@@ -9,7 +9,8 @@ import welcome.utils.Couleur;
 import welcome.Joueur;
 
 public class Strat279 extends Strat {
-    
+    private int tour = 0;
+    private int numeroInterim;
     public Strat279(){
     }
     
@@ -23,7 +24,7 @@ public class Strat279 extends Strat {
         return "TILHAC, Lily";
     }
     
-    //on importe la méthode construirePossibilite car elle est privée dans la classe Jeu mais on en aura besoin dans la strat
+    //On importe la méthode construirePossibilite car elle est privée dans la classe Jeu mais on en aura besoin dans la strat
     private ArrayList<Integer> construirePossibilite(int numero, Joueur joueur){
         int min; // Variable utiles
         ArrayList<Integer> possibilite= new ArrayList<>(); //List des possibilités Ã  construire
@@ -51,7 +52,7 @@ public class Strat279 extends Strat {
                     if (placeValide.get(i) % 100 + 1 == numero) return true;
                     break;
                 case 1:
-                    if (placeValide.get(i) % 100 + 4 == numero) return true;
+                    if (placeValide.get(i) % 100 + 5 == numero) return true;
                     break;
                 case 2:
                     if (placeValide.get(i) % 100 + 2 == numero) return true;
@@ -65,8 +66,8 @@ public class Strat279 extends Strat {
     //Choisir parmi les 3 numéros en fonction de la carte travaux (parcs> piscine > barrières > agent) et qi il n'y a pas ces cartes alors on choisit en focntion du numéro
     @Override
     public int choixCombinaison(Jeu j, int joueur){
-        
-        //on met les 3 duos numéros et actions dans un tableau à deux dimensions
+        tour++;
+        //On met les 3 duos numéros et actions dans un tableau à deux dimensions
         int [][]number_action = new int[][]{
             {((Travaux)j.numeros[0].top()).getNumero(),((Travaux)j.actions[0].top()).getAction()},
             {((Travaux)j.numeros[1].top()).getNumero(),((Travaux)j.actions[1].top()).getAction()},
@@ -77,7 +78,7 @@ public class Strat279 extends Strat {
         int[] choixEmplacements = new int[3];
         boolean[] emplacementTrouve = new boolean[3];
 
-        //On crée un tableau de listes de places valides pour les prendre en compte.
+        //On crée un tableau de listes de places valides pour les prendre en compte
         ArrayList<ArrayList<Integer>> placesValides = new ArrayList<>();
         for (int i = 0 ; i < 3 ; i++) {
             placesValides.add(construirePossibilite(number_action[i][0], j.joueurs[joueur]));
@@ -85,24 +86,36 @@ public class Strat279 extends Strat {
             emplacementTrouve[i] = peutPlacer(j.joueurs[joueur], number_action[i][0]);
         }
 
-        //on s'interesse d'abord aux parcs, on cherche si il y a une carte travaux "paysagiste"
+        //On s'interesse d'abord aux parcs, on cherche si il y a une carte travaux "paysagiste"
         for (int i=0; i<3; i++){
             if (emplacementTrouve[i]) {
                 int rue = placesValides.get(i).get(choixEmplacements[i]) / 100;
                 if (number_action[i][1]== 3 && j.joueurs[joueur].ville.nbParcs[rue] < rue + 3) return i;
             }
         }
-        //on va s'intéresser aux cartes "géomètre"
+        //On va s'intéresser aux cartes "géomètre"
         for (int i=0; i<3; i++){
             if (number_action[i][1]== 5 && emplacementTrouve[i]) return i;
         }
 
-        // On s'intéresse aux agents imo
+        //On s'intéresse aux cartes "agent immobilier"
         for (int i=0; i<3; i++){
             if (number_action[i][1]== 4 && emplacementTrouve[i]) return i;
         }
 
-        // Si on ne trouve rien, on utilise le numéro le plus extrème
+        //On s'intéresse aux interimaires
+        for (int i=0 ; i<3;i++) {
+            if (number_action[i][1] == 1) {
+                for (int k = Math.max(number_action[i][0] - 2, 0); k < number_action[i][0] + 2 ; k++) {
+                    if (peutPlacer(j.joueurs[joueur], k)) {
+                        numeroInterim = k;
+                        return i;
+                    }
+                }
+            }
+        }
+
+        // Si on ne trouve aucune des cartes précédentes, on fait en fonction du numéro et on utilise le plus extrème des 3 combinaisons
         int res = 0;
         int ecart = 0;
         for (int i = 0 ; i < 3 ; i++) {
@@ -116,13 +129,13 @@ public class Strat279 extends Strat {
 
     }
     
-    //Choisir de placer un numéro bis
+    //Choisir de placer un numéro bis, 
     @Override
     public int choixBis(Jeu j, int joueur, ArrayList<Integer> placeValide){
-        return 0;
+        return tour > 25 ? placeValide.size() - 1 : 0;
     }
     
-    //Choisir au hasard parmi les emplacements dispos
+    //Choisi l'emplacement en fonction de si c'est possible ou non et le mettre 
     @Override
     public int choixEmplacement(Jeu j, int joueur, int numero, ArrayList<Integer> placeValide){
         for (int i = placeValide.size() - 1 ; i >= 0 ; i--) {
@@ -131,7 +144,7 @@ public class Strat279 extends Strat {
                     if (placeValide.get(i) % 100 + 1 == numero) return i;
                     break;
                 case 1:
-                    if (placeValide.get(i) % 100 + 4 == numero) return i;
+                    if (placeValide.get(i) % 100 + 5 == numero) return i;
                     break;
                 case 2:
                     if (placeValide.get(i) % 100 + 2 == numero) return i;
@@ -141,34 +154,54 @@ public class Strat279 extends Strat {
         return 0;
     }
     
-    //Choisir le même numéro que celui de la carte quand l'action est un intérimaire
+    //choix interim en fonction de ce que qu'on a trouvé dans le choixCombinaison
     @Override
     public int choixNumero(Jeu j, int joueur, int numero){
-        int res=-1;
-        
-        if((res<(numero-2) || res>(numero+2)) || res<0)
-            res=Math.max(0, RandomSingleton.getInstance().nextInt(5) + numero - 2) ;
-        return res;
+        return Math.abs(numero - numeroInterim) <= 2 ? numeroInterim : numero;
     }
     
-    //Valorise aléatoirement une taille de lotissements (proba plus forte si plus d'avancements possibles)
+    //Valorise les lotissements de taille 5 et 6
     @Override
-    public int valoriseLotissement(Jeu j, int joueur){        
-        int res=-1;
-        
-        if(res<1 || res>6)
-            res=RandomSingleton.getInstance().nextInt(6)+1;
-        return res;
+    public int valoriseLotissement(Jeu j, int joueur){
+        if (j.joueurs[joueur].ville.avancementPrixLotissement[0] < 1) return 1;
+        if (j.joueurs[joueur].ville.avancementPrixLotissement[5] < 4) return 6;
+        if (j.joueurs[joueur].ville.avancementPrixLotissement[1] < 2) return 2;
+        return 3;
     }
     
-    //Met une barrière à une position aléatoire
+    //On va chercher à placer les barrières de manière à faire des lotissements de 5 et de 6 
     @Override
     public int choixBarriere(Jeu j, int joueur,  ArrayList<Integer> placeValide){
-        int res=-1;
-        
-        if(res<0 || res>placeValide.size()-1)
-            res=RandomSingleton.getInstance().nextInt(placeValide.size());
-        return res;
+
+        if (placeValide.contains(4)){
+            return placeValide.indexOf(4);
+        }
+        if (placeValide.contains(105)){
+            return placeValide.indexOf(105);
+        }
+        if (placeValide.contains(206)){
+            return placeValide.indexOf(206);
+        }
+        if (placeValide.contains(104)){
+            return placeValide.indexOf(104);
+        }
+        if (placeValide.contains(103)){
+            return placeValide.indexOf(103);
+        }
+        if (placeValide.contains(102)){
+            return placeValide.indexOf(102);
+        }
+        if (placeValide.contains(1)){
+            return placeValide.indexOf(1);
+        }
+        if (placeValide.contains(2)){
+            return placeValide.indexOf(2);
+        }
+        if (placeValide.contains(3)){
+            return placeValide.indexOf(3);
+        }
+        if (placeValide.size() >= 2) return 1;
+        else return 0;
     }
     
     //Valide toujours un plan
@@ -178,5 +211,5 @@ public class Strat279 extends Strat {
     }
     
     @Override
-    public void resetStrat(){};
+    public void resetStrat(){ tour = 0;};
 }
