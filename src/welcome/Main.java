@@ -11,7 +11,7 @@ public class Main {
         Scanner s = new Scanner(System.in);
         //Mode 1 : plein de parties - Mode 2 : détail de la partie
         System.out.println("CHOIX DU TYPE DE TEST\nMode 1 : plein de parties - Mode 2 : détail de la partie");
-        lancerMode(2);
+        lancerMode(1);
         s.close();
     }
 
@@ -26,7 +26,7 @@ public class Main {
 
     public static void championnat() {   //TEST 1
         try{
-            Championnat1v1 c = new Championnat1v1(new int[] {241, 88}, 10000);
+            Championnat1v1 c = new Championnat1v1(new int[] {279}, 10000);
             c.run();
         }
         catch(Exception e){
@@ -36,7 +36,7 @@ public class Main {
 
     public static void exempleLanceIA() {   //TEST 1
         try{
-            TousEnsemble t = new TousEnsemble(new int[] {241, 88}, 10000);
+            TousEnsemble t = new TousEnsemble(new int[] {88}, 100000);
             t.run();
         }
         catch(Exception e){
@@ -49,6 +49,11 @@ public class Main {
         Joueur j0= new Bot(new Strat88(), "Leo", "Loos en gohelle");
         Joueur j1= new Bot(new Strat241(), "Jules241", "Los Angeles");
         Joueur j2= new Bot(new Strat243(), "Jules243", "Los Angeles");
+        Joueur j3= new Bot(new Strat167(), "WestCoast", "Ranch");
+        Joueur j4= new Bot(new Strat226(), "Robin", "Gotham");
+        Joueur j5= new Bot(new Strat202(), "Léo M", "VeloCity");
+        Joueur j6= new Bot(new Strat279(), "Lily", "LilyVillage");
+
         Joueur[] joueurs = {j0};
 
         Jeu j= new Jeu(joueurs);
