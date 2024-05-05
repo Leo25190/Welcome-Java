@@ -1,17 +1,17 @@
 package welcome.ia;
 import welcome.*;
 import java.util.ArrayList;
-//Strat88, Léo Delecroix, 110 pts / 100k parties
-//Après pas mal de recherche sur la façon dont placer les numéros le plus efficacement, j'en suis arrivé à les placer à partir d'un écart et d'un tableau idéal.
-//Les places valides sont d'abord parcourues dans le sens inverse jusqu'à renvoyer l'écart minimal entre le numéro actuel et le tableau d'emplacements idéaux
-//Si un nombre trouve sa place, une pondération lui est accordée en fonction de sa probabilité d'apparition, d'un multiplicateur, ainsi que de sa carte action associé
-//La priorité en des actions est dans cet ordre : Parcs > Piscines > Géomètres > Agents Imo.
-//Les BIS ont une grande priorité à partir de la 29ème maison placée. Ceux-ci n'ont pas de logique spécifique, on les place juste sur le dernier emplacement des places valides
-//Pour les intérimaires, on utilise la même stratégie de placement que pour les autres numéros que l'on répète sur les maximums 5 possibilités offertes par l'action.
-//Si un emplacement idéal est trouvé pour n'importe lequel des numéros d'intérimaire, le meilleur d'entre eux est sauvegardé et on donne la pondération correspondante à la probabilité du numéro sauvegardé.
-//Pour les barrières, nous faisons des lotissements de 6 et de 1.
-//Pour les piscines, on les place là où l'écart avec son emplacement est inférieur à 0.68
-//Pour les agents, on augmente les lotissements de 1 et de 6 et ensuite des autres.
+// Strat88, Léo Delecroix, 110 pts / 100k parties
+// Après pas mal de recherche sur la façon de placer les numéros le plus efficacement possible, j'en suis arrivé à les placer à partir d'un écart et d'un tableau idéal.
+// Les places valides sont d'abord parcourues dans le sens inverse jusqu'à renvoyer l'écart minimal entre le numéro actuel et le tableau d'emplacements idéaux.
+// Si un nombre trouve sa place, une pondération lui est accordée en fonction de sa probabilité d'apparition, d'un multiplicateur, ainsi que de sa carte action associée.
+// La priorité des actions est dans cet ordre : Parcs > Piscines > Géomètres > Agents Imo.
+// Les BIS ont une grande priorité à partir de la 29ème maison placée. Ceux-ci n'ont pas de logique spécifique, on les place juste sur le dernier emplacement des places valides.
+// Pour les intérimaires, on utilise la même stratégie de placement que pour les autres numéros, que l'on répète sur les maximums 5 possibilités offertes par l'action.
+// Si un emplacement idéal est trouvé pour n'importe lequel des numéros d'intérimaire, le meilleur d'entre eux est sauvegardé et on donne la pondération correspondante à la probabilité du numéro sauvegardé.
+// Pour les barrières, nous faisons des lotissements de 6 et de 1.
+// Pour les piscines, on les place là où l'écart avec leur emplacement est inférieur à 0.68.
+// Pour les agents, on augmente les lotissements de 1 et de 6, et ensuite des autres.
 
 public class Strat88 extends Strat{
 
